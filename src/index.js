@@ -11,7 +11,7 @@ client.once(Events.ClientReady, (readyClient) => {
 client.commands = loadCommands();
 
 client.on(Events.InteractionCreate, (interaction) => {
-  console.log(interaction);
+  // console.log(interaction);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {

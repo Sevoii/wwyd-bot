@@ -1,9 +1,9 @@
 require("dotenv").config({ path: "./.env" });
 
 const { REST, Routes } = require("discord.js");
-const { load_commands } = require("./commands/load_commands");
+const { loadCommands } = require("./commands/load_commands");
 
-const commands = load_commands().map(x => x.data.toJSON());
+const commands = loadCommands().map(x => x.data.toJSON());
 const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN);
 
 (async () => {
