@@ -1,7 +1,7 @@
 const sharp = require("sharp");
 const path = require("node:path");
 
-const MAPPINGS = {
+const SEAT_MAPPINGS = {
   E: "東",
   S: "南",
   W: "西",
@@ -11,7 +11,7 @@ const MAPPINGS = {
 const EMOJI_MAPPINGS = require("../assets/personal_emoji_mappings.json");
 
 const generateHeader = ({ seat, round, turn }) =>
-  `Round:${MAPPINGS[round]} Seat:${MAPPINGS[seat]} Turn:${turn}`;
+  `Round:${SEAT_MAPPINGS[round]} Seat:${SEAT_MAPPINGS[seat]} Turn:${turn}`;
 
 const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const HEADER_HEIGHT = 75;
