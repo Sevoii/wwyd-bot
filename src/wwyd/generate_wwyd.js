@@ -8,7 +8,10 @@ const MAPPINGS = {
   N: "北",
 };
 
-const generateHeader = ({seat, round, turn}) => `Round:${MAPPINGS[round]} Seat:${MAPPINGS[seat]} Turn:${turn}`
+const EMOJI_MAPPINGS = require("../assets/personal_emoji_mappings.json");
+
+const generateHeader = ({ seat, round, turn }) =>
+  `Round:${MAPPINGS[round]} Seat:${MAPPINGS[seat]} Turn:${turn}`;
 
 const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const HEADER_HEIGHT = 75;
@@ -17,6 +20,7 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const TILE_HEIGHT = 129;
   const DORA_WIDTH = 35;
 
+  hand = hand.slice();
   hand.push(draw);
 
   const composite = hand.map((x, index) => ({
@@ -33,7 +37,7 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   composite.push({
     input: {
       text: {
-        text: `<span foreground="white"><b>${generateHeader({seat, round, turn})}</b></span>`,
+        text: `<span foreground="white"><b>${generateHeader({ seat, round, turn })}</b></span>`,
         dpi: 200,
         rgba: true,
         font: "monospace",
@@ -116,14 +120,12 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   // ]));
 };
 
-const generateNoHeaderImage = async ({
-  hand,
-  draw,
-}) => {
+const generateNoHeaderImage = async ({ hand, draw }) => {
   const TILE_WIDTH = 80;
   const TILE_GAP = 20;
   const TILE_HEIGHT = 129;
 
+  hand = hand.slice();
   hand.push(draw);
 
   const composite = hand.map((x, index) => ({
@@ -152,13 +154,18 @@ const generateNoHeaderImage = async ({
 
 const generateDescription = ({ comment }) => {
   return comment
-    .map((x) => (x instanceof Array ? x.map((x) => `:${x}:`).join(",") : x))
+    .map((x) =>
+      x instanceof Array
+        ? x.map((x) => `<:${x}:${EMOJI_MAPPINGS[x]}>`).join("")
+        : x,
+    )
     .join("");
 };
 
 const suitOrder = { m: 0, p: 1, s: 2, z: 3 };
 
 const getOptions = ({ hand, draw }) => {
+  hand = hand.slice();
   hand.push(draw);
   hand.sort((a, b) => {
     const [iA, sA] = [parseInt(a[0], 10), a[1]];
