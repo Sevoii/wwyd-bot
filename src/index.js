@@ -1,6 +1,6 @@
 require("dotenv").config({ path: "./.env" });
 const { Client, Events, GatewayIntentBits, MessageFlags } = require("discord.js");
-const { load_commands } = require("./commands/load_commands");
+const { loadCommands } = require("./commands/load_commands");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -8,7 +8,7 @@ client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-client.commands = load_commands();
+client.commands = loadCommands();
 
 client.on(Events.InteractionCreate, (interaction) => {
   console.log(interaction);

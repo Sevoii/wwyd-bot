@@ -3,7 +3,7 @@ const path = require("node:path");
 const { Collection } = require("discord.js");
 
 
-const load_commands = () => {
+const loadCommands = () => {
   const commands = new Collection();
 
   for (const path_name of fs.readdirSync(__dirname)) {
@@ -38,5 +38,5 @@ const load_commands = () => {
 };
 
 module.exports = {
-  load_commands
+  loadCommands
 };
