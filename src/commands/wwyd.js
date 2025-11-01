@@ -77,8 +77,8 @@ const generateQuestionMessage = async (i, wwyd, ephemeral = false) => {
         options.slice(i, i + 5).map((x) =>
           new ButtonBuilder()
             .setCustomId(`wwyd_random:${i}:${x}`)
-            // .setLabel(x)
-            .setEmoji(EMOJI_MAPPINGS[x])
+            .setLabel(x)
+            // .setEmoji(EMOJI_MAPPINGS[x])
             .setStyle(ButtonStyle.Primary),
         ),
       ),
