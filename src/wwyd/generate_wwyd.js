@@ -8,6 +8,8 @@ const MAPPINGS = {
   N: "北",
 };
 
+const generateHeader = ({seat, round, turn}) => `Round:${MAPPINGS[round]} Seat:${MAPPINGS[seat]} Turn:${turn}`
+
 const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const HEADER_HEIGHT = 75;
   const TILE_WIDTH = 80;
@@ -31,7 +33,7 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   composite.push({
     input: {
       text: {
-        text: `<span foreground="white"><b>Round:${MAPPINGS[round]} Seat:${MAPPINGS[seat]} Turn:${turn}</b></span>`,
+        text: `<span foreground="white"><b>${generateHeader({seat, round, turn})}</b></span>`,
         dpi: 200,
         rgba: true,
         font: "monospace",
@@ -115,10 +117,6 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
 };
 
 const generateNoHeaderImage = async ({
-  seat,
-  round,
-  turn,
-  indicator,
   hand,
   draw,
 }) => {
@@ -175,6 +173,8 @@ const getOptions = ({ hand, draw }) => {
 
 module.exports = {
   generateImage,
+  generateNoHeaderImage,
+  generateHeader,
   generateDescription,
   getOptions,
 };
