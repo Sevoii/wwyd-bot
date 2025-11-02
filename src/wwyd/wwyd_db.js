@@ -14,7 +14,7 @@ db.prepare(
 ).run();
 
 db.prepare(
-  `CREATE TABLE IF NOT EXISTS ${USER_SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), score INTEGER, PRIMARY KEY (guild_id, discord_id))`,
+  `CREATE TABLE IF NOT EXISTS ${USER_SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), score INTEGER, correct INTEGER, attempts INTEGER, PRIMARY KEY (guild_id, discord_id))`,
 ).run();
 
 const GET_DAILY_ENABLED = db.prepare(`SELECT * FROM ${WWYD_CHANNELS}`);
@@ -50,17 +50,35 @@ const _INSERT_PROBLEM_SCORE =
 //                 AND discord_id = @discordId`);
 
 const _UPSERT_USER_SCORE = db.prepare(`
-  INSERT INTO ${USER_SCORES} (guild_id, discord_id, score)
-  VALUES (@guildId, @discordId, @score)
-  ON CONFLICT(guild_id, discord_id) 
-  DO UPDATE SET score = score + @score
-`);
+  INSERT INTO ${USER_SCORES} (guild_id, discord_id, score, correct, attempts)
+  VALUES (@guildId,
+          @discordId,
+          @score,
+          CASE WHEN @score > 0 THEN 1 ELSE 0 END,
+          1) ON CONFLICT(guild_id, discord_id) 
+  DO
+    UPDATE SET
+      score = score + @score,
+      correct = correct + (CASE WHEN @score > 0 THEN 1 ELSE 0 END),
+      attempts = attempts + 1;
+  `);
 
-
-const INSERT_SCORE = db.transaction((inpt) => {
+const
+  INSERT_SCORE = db.transaction((inpt) => {
   _INSERT_PROBLEM_SCORE.run(inpt);
   _UPSERT_USER_SCORE.run(inpt);
 });
+
+const
+  GET_LEADERBOARD = db.prepare(`SELECT *
+                                    FROM ${USER_SCORES}
+                                    WHERE guild_id = @guildId
+                                    ORDER BY score desc LIMIT 10`);
+
+const GET_SCORE = db.prepare(`SELECT score
+                              FROM ${USER_SCORES}
+                              WHERE guild_id = @guildId
+                                AND discord_id = @discordId`);
 
 const getDailyChannels = () => {
   try {
@@ -124,9 +142,27 @@ const addScore = (guildId, discordId, problemId, score) => {
   }
 };
 
+const getLeaderboard = (guildId) => {
+  try {
+    return GET_LEADERBOARD.all({ guildId });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const getScore = (guildId, discordId) => {
+  try {
+    return GET_SCORE.get({ guildId, discordId })?.score ?? 0;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 module.exports = {
   getDailyChannels,
   toggleDaily,
   deleteDailyChannels,
   addScore,
+  getLeaderboard,
+  getScore,
 };

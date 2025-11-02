@@ -2,6 +2,7 @@ const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const { generateQuestionMessage } = require("../wwyd/generate_wwyd");
 const { randomWwyd } = require("../wwyd/wwyd_gen");
 const { toggleDaily } = require("../wwyd/wwyd_db");
+const { generateLeaderboard, generateScore } = require("../wwyd/wwyd_lb");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,6 +23,16 @@ module.exports = {
           subcommand
             .setName("toggle")
             .setDescription("Toggles daily WWYD for the server"),
+        )
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName("leaderboard")
+            .setDescription("Gets the leaderboard for the server"),
+        )
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName("score")
+            .setDescription("Gets your score in the server"),
         ),
     ),
   async execute(interaction) {
@@ -60,6 +71,12 @@ module.exports = {
         } else {
           await interaction.reply("Internal Error, please try again");
         }
+      } else if (subcommand === "leaderboard") {
+        await interaction.reply(generateLeaderboard(interaction.guildId));
+      } else if (subcommand === "score") {
+        await interaction.reply(
+          generateScore(interaction.guildId, interaction.member.id),
+        );
       }
     }
   },
