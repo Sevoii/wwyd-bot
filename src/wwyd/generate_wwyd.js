@@ -4,7 +4,6 @@ const {
   ButtonBuilder,
   ButtonStyle,
   MessageFlags,
-  EmbedBuilder,
 } = require("discord.js");
 const sharp = require("sharp");
 const path = require("node:path");
@@ -166,12 +165,15 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
 
   const actionRows = [];
 
+  const date = new Date();
+  const uuid = date.toISOString().slice(0, 10).replace(/-/g, '');
+
   for (let j = 0; j < options.length; j += 5) {
     actionRows.push(
       new ActionRowBuilder().addComponents(
         options.slice(j, j + 5).map((x) =>
           new ButtonBuilder()
-            .setCustomId(`${label}:${i}:${x}`)
+            .setCustomId(`${label}:${i}:${uuid}:${x}`)
             .setLabel(x)
             // .setEmoji(EMOJI_MAPPINGS[x])
             .setStyle(ButtonStyle.Primary),
@@ -183,7 +185,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   actionRows.push(
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`wwyd:${i}:pass`)
+        .setCustomId(`wwyd:${i}:${uuid}:pass`)
         .setLabel("pass")
         .setStyle(ButtonStyle.Danger),
     ),

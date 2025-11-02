@@ -33,7 +33,8 @@ module.exports = {
           value: description,
           inline: false,
         },
-      ]);
+      ])
+      .setColor(buttonData[3] === wwyd.answer ? "Green" : "Red");
 
     await interaction.editReply({
       embeds: [embed],

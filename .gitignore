@@ -1,3 +1,6 @@
 .idea
 node_modules
 .env
+wwyd.db
+wwyd.db-shm
+wwyd.db-wal

@@ -8,6 +8,7 @@
   },
   "private": true,
   "dependencies": {
+    "better-sqlite3": "^12.4.1",
     "discord.js": "^14.24.2",
     "dotenv": "^17.2.3",
     "node-schedule": "^2.1.1",
