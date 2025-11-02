@@ -168,6 +168,12 @@ const getWwydUUID = (i, wwyd) => {
   return date.toISOString().slice(0, 10).replace(/-/g, "") + "-" + i;
 };
 
+const STYLE_MAPPING = {
+  m: ButtonStyle.Danger,
+  p: ButtonStyle.Secondary,
+  s: ButtonStyle.Success,
+};
+
 const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   const image = await generateImage(wwyd);
   const options = getOptions(wwyd);
@@ -190,7 +196,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
             .setCustomId(`${label}:${i}:${uuid}:${x}`)
             .setLabel(x)
             // .setEmoji(EMOJI_MAPPINGS[x])
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(STYLE_MAPPING[x[1]]),
         ),
       ),
     );
@@ -201,7 +207,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
       new ButtonBuilder()
         .setCustomId(`${label}:${i}:${uuid}:na`)
         .setLabel("pass")
-        .setStyle(ButtonStyle.Danger),
+        .setStyle(ButtonStyle.Primary),
     ),
   );
 
