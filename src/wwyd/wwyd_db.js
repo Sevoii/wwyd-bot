@@ -15,7 +15,7 @@ db.prepare(
 ).run();
 
 db.prepare(
-  `CREATE TABLE IF NOT EXISTS ${SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), problem_id VARCHAR(16), correct INTEGER, PRIMARY KEY (guild_id, discord_id, problem_id))`,
+  `CREATE TABLE IF NOT EXISTS ${SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), problem_id VARCHAR(16), correct INTEGER, answer VARCHAR(2), PRIMARY KEY (guild_id, discord_id, problem_id))`,
 ).run();
 
 db.prepare(
@@ -45,9 +45,9 @@ const CHECK_SCORE_EXISTS = db.prepare(`SELECT *
                                          AND problem_id = @problemId`);
 
 const _INSERT_PROBLEM_SCORE =
-  db.prepare(`INSERT INTO ${SCORES} (guild_id, discord_id, problem_id, correct)
+  db.prepare(`INSERT INTO ${SCORES} (guild_id, discord_id, problem_id, answer, correct)
               VALUES (@guildId, @discordId, @problemId,
-                      @score) ON CONFLICT(guild_id, discord_id, problem_id) DO NOTHING`);
+                      @answer, @score) ON CONFLICT(guild_id, discord_id, problem_id) DO NOTHING`);
 
 // const _UPDATE_USER_SCORE = db.prepare(`UPDATE ${USER_SCORES}
 //               SET score = score + @score
@@ -87,7 +87,8 @@ const SET_LATEST_WWYD = db.prepare(
   `INSERT INTO ${WWYD_DAILY} (guild_id, problem_id, internal_id, channel_id, message_id) VALUES (@guildId, @problemId, @internalId, @channelId, @messageId)`,
 );
 
-const GET_LATEST_WWYD = db.prepare(`SELECT problem_id, internal_id, channel_id, message_id
+const GET_LATEST_WWYD =
+  db.prepare(`SELECT problem_id, internal_id, channel_id, message_id
                                     FROM ${WWYD_DAILY}
                                     WHERE guild_id = @guildId
                                     ORDER BY created DESC LIMIT 1`);
@@ -98,13 +99,13 @@ const GET_WWYD_STATS =
                                    WHERE guild_id = @guildId
                                      AND problem_id = @problemId`);
 
-const GET_WWYD_ANSWERERS = db.prepare(`SELECT s.discord_id AS discord_id, us.score AS score
+const GET_WWYD_ANSWERERS =
+  db.prepare(`SELECT s.discord_id AS discord_id, us.score AS score, s.correct as correct, s.answer as answer
                                        FROM ${SCORES} s
                                               JOIN ${USER_SCORES} us
                                                    ON s.discord_id = us.discord_id AND s.guild_id = us.guild_id
                                        WHERE s.guild_id = @guildId
                                          AND s.problem_id = @problemId
-                                         AND s.correct > 0
                                        ORDER BY s.correct DESC, us.score DESC`);
 
 const getDailyChannels = () => {
@@ -150,7 +151,7 @@ const toggleDaily = (guildId, channelId) => {
   }
 };
 
-const addScore = (guildId, discordId, problemId, score) => {
+const addScore = (guildId, discordId, problemId, answer, score) => {
   try {
     if (CHECK_SCORE_EXISTS.get({ guildId, discordId, problemId })) {
       return 0;
@@ -160,6 +161,7 @@ const addScore = (guildId, discordId, problemId, score) => {
         discordId,
         problemId,
         score,
+        answer,
       });
       return 1;
     }
@@ -185,9 +187,21 @@ const getScore = (guildId, discordId) => {
   }
 };
 
-const setLatestWwyd = (guildId, problemId, internalId, channelId, messageId) => {
+const setLatestWwyd = (
+  guildId,
+  problemId,
+  internalId,
+  channelId,
+  messageId,
+) => {
   try {
-    SET_LATEST_WWYD.run({ guildId, problemId, internalId, channelId, messageId });
+    SET_LATEST_WWYD.run({
+      guildId,
+      problemId,
+      internalId,
+      channelId,
+      messageId,
+    });
   } catch (err) {
     console.error(err);
   }
@@ -198,7 +212,10 @@ const getPrevStats = (guildId) => {
     const data = GET_LATEST_WWYD.get({ guildId });
     if (data) {
       const data1 = GET_WWYD_STATS.get({ guildId, problemId: data.problem_id });
-      const data2 = GET_WWYD_ANSWERERS.all({ guildId, problemId: data.problem_id })
+      const data2 = GET_WWYD_ANSWERERS.all({
+        guildId,
+        problemId: data.problem_id,
+      });
 
       if (data1 && data2) {
         return {
@@ -207,8 +224,16 @@ const getPrevStats = (guildId) => {
           internalId: data.internal_id,
           successes: data1.successes ?? 0,
           attempts: data1.attempts ?? 0,
-          answerers: data2.map(x => {return {discord_id: x.discord_id, score: x.score}})
-        }
+          answerers: data2
+            .filter((x) => x.correct > 0)
+            .map((x) => {
+              return { discord_id: x.discord_id, score: x.score };
+            }),
+          answerCounts: data2.reduce((acc, x) => {
+            acc[x.answer] = (acc[x.answer] || 0) + 1;
+            return acc;
+          }, {}),
+        };
       }
     }
 

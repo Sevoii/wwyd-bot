@@ -22,6 +22,7 @@ module.exports = {
       interaction.guildId,
       interaction.member.id,
       buttonData[2],
+      buttonData[3],
       correct ? 1 : 0,
     );
 
