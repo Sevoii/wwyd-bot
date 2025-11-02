@@ -2,11 +2,16 @@ const db = require("better-sqlite3")("wwyd.db");
 db.pragma("journal_mode = WAL");
 
 const WWYD_CHANNELS = "WwydChannels";
+const WWYD_DAILY = "WwydDaily";
 const SCORES = "WwydScore";
 const USER_SCORES = "UserScore";
 
 db.prepare(
   `CREATE TABLE IF NOT EXISTS ${WWYD_CHANNELS} (guild_id VARCHAR(18) PRIMARY KEY, channel_id VARCHAR(18))`,
+).run();
+
+db.prepare(
+  `CREATE TABLE IF NOT EXISTS ${WWYD_DAILY} (guild_id VARCHAR(18), problem_id VARCHAR(16), created DATETIME DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (guild_id, problem_id))`,
 ).run();
 
 db.prepare(
@@ -63,14 +68,12 @@ const _UPSERT_USER_SCORE = db.prepare(`
       attempts = attempts + 1;
   `);
 
-const
-  INSERT_SCORE = db.transaction((inpt) => {
+const INSERT_SCORE = db.transaction((inpt) => {
   _INSERT_PROBLEM_SCORE.run(inpt);
   _UPSERT_USER_SCORE.run(inpt);
 });
 
-const
-  GET_LEADERBOARD = db.prepare(`SELECT *
+const GET_LEADERBOARD = db.prepare(`SELECT *
                                     FROM ${USER_SCORES}
                                     WHERE guild_id = @guildId
                                     ORDER BY score desc LIMIT 10`);
@@ -79,6 +82,30 @@ const GET_SCORE = db.prepare(`SELECT score
                               FROM ${USER_SCORES}
                               WHERE guild_id = @guildId
                                 AND discord_id = @discordId`);
+
+const SET_LATEST_WWYD = db.prepare(
+  `INSERT INTO ${WWYD_DAILY} (guild_id, problem_id) VALUES (@guildId, @problemId)`,
+);
+
+const GET_LATEST_WWYD = db.prepare(`SELECT problem_id
+                                    FROM ${WWYD_DAILY}
+                                    WHERE guild_id = @guildId
+                                    ORDER BY created DESC LIMIT 1`);
+
+const GET_WWYD_STATS =
+  db.prepare(`SELECT SUM(correct > 0) as successes, COUNT(*) as attempts
+                                   FROM ${SCORES}
+                                   WHERE guild_id = @guildId
+                                     AND problem_id = @problemId`);
+
+const GET_WWYD_ANSWERERS = db.prepare(`SELECT s.discord_id AS discord_id, us.score AS score
+                                       FROM ${SCORES} s
+                                              JOIN ${USER_SCORES} us
+                                                   ON s.discord_id = us.discord_id AND s.guild_id = us.guild_id
+                                       WHERE s.guild_id = @guildId
+                                         AND s.problem_id = @problemId
+                                         AND s.correct > 0
+                                       ORDER BY s.correct DESC, us.score DESC`);
 
 const getDailyChannels = () => {
   try {
@@ -158,6 +185,36 @@ const getScore = (guildId, discordId) => {
   }
 };
 
+const setLatestWwyd = (guildId, problemId) => {
+  try {
+    SET_LATEST_WWYD.run({ guildId, problemId });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const getPrevStats = (guildId) => {
+  try {
+    const data = GET_LATEST_WWYD.get({ guildId });
+    if (data) {
+      const data1 = GET_WWYD_STATS.get({ guildId, problemId: data.problem_id });
+      const data2 = GET_WWYD_ANSWERERS.all({ guildId, problemId: data.problem_id })
+
+      if (data1 && data2) {
+        return {
+          successes: data1.successes ?? 0,
+          attempts: data1.attempts ?? 0,
+          answerers: data2.map(x => {return {discord_id: x.discord_id, score: x.score}})
+        }
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 module.exports = {
   getDailyChannels,
   toggleDaily,
@@ -165,4 +222,6 @@ module.exports = {
   addScore,
   getLeaderboard,
   getScore,
+  setLatestWwyd,
+  getPrevStats,
 };

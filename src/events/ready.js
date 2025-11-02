@@ -8,7 +8,7 @@ module.exports = {
     console.log(`Ready! Logged in as ${client.user.tag}`);
 
     const rule = new schedule.RecurrenceRule();
-    rule.hour = 17;
+    rule.hour = 15;
     rule.minute = 0;
     // rule.tz = "Etc/UTC";
 

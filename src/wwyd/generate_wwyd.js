@@ -155,6 +155,11 @@ const getOptions = ({ hand, draw }) => {
   return hand.filter((item, index) => hand.indexOf(item) === index);
 };
 
+const getWwydUUID = (i, wwyd) => {
+  const date = new Date();
+  return date.toISOString().slice(0, 10).replace(/-/g, "") + "-" + i;
+};
+
 const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   const image = await generateImage(wwyd);
   const options = getOptions(wwyd);
@@ -167,8 +172,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
 
   const actionRows = [];
 
-  const date = new Date();
-  const uuid = date.toISOString().slice(0, 10).replace(/-/g, "") + "-" + i;
+  const uuid = getWwydUUID(i, wwyd);
 
   for (let j = 0; j < options.length; j += 5) {
     actionRows.push(
@@ -238,5 +242,6 @@ module.exports = {
   generateDescription,
   getOptions,
   generateQuestionMessage,
-  generateAnswerMessage
+  generateAnswerMessage,
+  getWwydUUID,
 };
