@@ -27,7 +27,7 @@ module.exports = {
         .addSubcommand((subcommand) =>
           subcommand
             .setName("force")
-            .setDescription("Forces the bot to send a daily WWYD in the server"),
+            .setDescription("Forces the bot to send a daily WWYD in the channel"),
         )
         .addSubcommand((subcommand) =>
           subcommand
