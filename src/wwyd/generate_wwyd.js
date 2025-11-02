@@ -195,7 +195,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   actionRows.push(
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`wwyd:${i}:${uuid}:pass`)
+        .setCustomId(`${label}:${i}:${uuid}:na`)
         .setLabel("pass")
         .setStyle(ButtonStyle.Danger),
     ),

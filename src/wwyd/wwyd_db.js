@@ -97,7 +97,8 @@ const GET_WWYD_STATS =
   db.prepare(`SELECT SUM(correct > 0) as successes, COUNT(*) as attempts
                                    FROM ${SCORES}
                                    WHERE guild_id = @guildId
-                                     AND problem_id = @problemId`);
+                                     AND problem_id = @problemId
+                                     AND answer != 'na'`);
 
 const GET_WWYD_ANSWERERS =
   db.prepare(`SELECT s.discord_id AS discord_id, us.score AS score, s.correct as correct, s.answer as answer
@@ -106,6 +107,7 @@ const GET_WWYD_ANSWERERS =
                                                    ON s.discord_id = us.discord_id AND s.guild_id = us.guild_id
                                        WHERE s.guild_id = @guildId
                                          AND s.problem_id = @problemId
+                                         AND answer != 'na'
                                        ORDER BY s.correct DESC, us.score DESC`);
 
 const getDailyChannels = () => {
@@ -151,18 +153,28 @@ const toggleDaily = (guildId, channelId) => {
   }
 };
 
-const addScore = (guildId, discordId, problemId, answer, score) => {
+const addScore = (guildId, discordId, problemId, answer, score, isPass) => {
   try {
     if (CHECK_SCORE_EXISTS.get({ guildId, discordId, problemId })) {
       return 0;
     } else {
-      INSERT_SCORE({
-        guildId,
-        discordId,
-        problemId,
-        score,
-        answer,
-      });
+      if (isPass) {
+        _INSERT_PROBLEM_SCORE.run({
+          guildId,
+          discordId,
+          problemId,
+          score,
+          answer,
+        });
+      } else {
+        INSERT_SCORE({
+          guildId,
+          discordId,
+          problemId,
+          score,
+          answer,
+        });
+      }
       return 1;
     }
   } catch (err) {

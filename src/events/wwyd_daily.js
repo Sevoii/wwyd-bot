@@ -24,6 +24,7 @@ module.exports = {
       buttonData[2],
       buttonData[3],
       correct ? 1 : 0,
+      buttonData[3] === "na",
     );
 
     if (res === -1) {
