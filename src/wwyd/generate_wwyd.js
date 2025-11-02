@@ -10,10 +10,10 @@ const sharp = require("sharp");
 const path = require("node:path");
 
 const SEAT_MAPPINGS = {
-  E: "東",
-  S: "南",
-  W: "西",
-  N: "北",
+  E: "\u6771",
+  S: "\u5357",
+  W: "\u897F",
+  N: "\u5317",
 };
 
 const EMOJI_MAPPINGS = require("../assets/personal_emoji_mappings.json");
