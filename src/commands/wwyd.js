@@ -26,6 +26,11 @@ module.exports = {
         )
         .addSubcommand((subcommand) =>
           subcommand
+            .setName("force")
+            .setDescription("Forces the bot to send a daily WWYD in the server"),
+        )
+        .addSubcommand((subcommand) =>
+          subcommand
             .setName("leaderboard")
             .setDescription("Gets the leaderboard for the server"),
         )
@@ -71,6 +76,17 @@ module.exports = {
         } else {
           await interaction.reply("Internal Error, please try again");
         }
+      } else if (subcommand === "force") {
+        if (!interaction.member.permissions.has("ManageChannels")) {
+          await interaction.reply({
+            content:
+              "You need the Manage Channels permission to use this command.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply("OK")
+        interaction.client.emit("WWYD_Daily", interaction.client);
       } else if (subcommand === "leaderboard") {
         await interaction.reply(generateLeaderboard(interaction.guildId));
       } else if (subcommand === "score") {

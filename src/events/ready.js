@@ -6,7 +6,6 @@ module.exports = {
   once: true,
   execute(client) {
     console.log(`Ready! Logged in as ${client.user.tag}`);
-    client.emit("WWYD_Daily", client);
 
     const rule = new schedule.RecurrenceRule();
     rule.hour = 10;
