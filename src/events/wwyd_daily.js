@@ -42,9 +42,12 @@ module.exports = {
       );
 
       await interaction.editReply(message);
-      await interaction.channel.send(
-        `<@${interaction.member.id}> was correct!`,
-      );
+
+      if (res === 1 && correct) {
+        await interaction.channel.send(
+          `<@${interaction.member.id}> was correct!`,
+        );
+      }
     }
   },
 };

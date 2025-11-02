@@ -3,6 +3,7 @@ db.pragma("journal_mode = WAL");
 
 const WWYD_CHANNELS = "WwydChannels";
 const SCORES = "WwydScore";
+const USER_SCORES = "UserScore";
 
 db.prepare(
   `CREATE TABLE IF NOT EXISTS ${WWYD_CHANNELS} (guild_id VARCHAR(18) PRIMARY KEY, channel_id VARCHAR(18))`,
@@ -10,6 +11,10 @@ db.prepare(
 
 db.prepare(
   `CREATE TABLE IF NOT EXISTS ${SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), problem_id VARCHAR(16), correct INTEGER, PRIMARY KEY (guild_id, discord_id, problem_id))`,
+).run();
+
+db.prepare(
+  `CREATE TABLE IF NOT EXISTS ${USER_SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), score INTEGER, PRIMARY KEY (guild_id, discord_id))`,
 ).run();
 
 const GET_DAILY_ENABLED = db.prepare(`SELECT * FROM ${WWYD_CHANNELS}`);
@@ -34,10 +39,28 @@ const CHECK_SCORE_EXISTS = db.prepare(`SELECT *
                                          AND discord_id = @discordId
                                          AND problem_id = @problemId`);
 
-const INSERT_SCORE =
+const _INSERT_PROBLEM_SCORE =
   db.prepare(`INSERT INTO ${SCORES} (guild_id, discord_id, problem_id, correct)
               VALUES (@guildId, @discordId, @problemId,
-                      @correct) ON CONFLICT(guild_id, discord_id, problem_id) DO NOTHING`);
+                      @score) ON CONFLICT(guild_id, discord_id, problem_id) DO NOTHING`);
+
+// const _UPDATE_USER_SCORE = db.prepare(`UPDATE ${USER_SCORES}
+//               SET score = score + @score
+//               WHERE guild_id = @guildId
+//                 AND discord_id = @discordId`);
+
+const _UPSERT_USER_SCORE = db.prepare(`
+  INSERT INTO ${USER_SCORES} (guild_id, discord_id, score)
+  VALUES (@guildId, @discordId, @score)
+  ON CONFLICT(guild_id, discord_id) 
+  DO UPDATE SET score = score + @score
+`);
+
+
+const INSERT_SCORE = db.transaction((inpt) => {
+  _INSERT_PROBLEM_SCORE.run(inpt);
+  _UPSERT_USER_SCORE.run(inpt);
+});
 
 const getDailyChannels = () => {
   try {
@@ -82,16 +105,16 @@ const toggleDaily = (guildId, channelId) => {
   }
 };
 
-const addScore = (guildId, discordId, problemId, correct) => {
+const addScore = (guildId, discordId, problemId, score) => {
   try {
     if (CHECK_SCORE_EXISTS.get({ guildId, discordId, problemId })) {
       return 0;
     } else {
-      INSERT_SCORE.run({
+      INSERT_SCORE({
         guildId,
         discordId,
         problemId,
-        correct,
+        score,
       });
       return 1;
     }
