@@ -12,7 +12,7 @@ const generateLeaderboard = (guildId) => {
           (x, i) =>
             `${i + 1}. <@${x.discord_id}> — ${x.score} pts • ${x.attempts} attempts • ${Math.round((x.correct / x.attempts) * 100)}%`,
         )
-        .join(",\n"),
+        .join("\n") + "\n",
     );
 
   return {

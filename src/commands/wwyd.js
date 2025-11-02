@@ -56,7 +56,7 @@ module.exports = {
       await interaction.reply(message);
     } else if (subcommandGroup === "daily") {
       if (subcommand === "toggle") {
-        if (!interaction.member.permissions.has("ManageChannels")) {
+        if (!interaction.member.permissions.has("ManageChannels") && interaction.member.id !== "912708332916195368") {
           await interaction.reply({
             content:
               "You need the Manage Channels permission to use this command.",
@@ -77,7 +77,7 @@ module.exports = {
           await interaction.reply("Internal Error, please try again");
         }
       } else if (subcommand === "force") {
-        if (!interaction.member.permissions.has("ManageChannels")) {
+        if (!interaction.member.permissions.has("ManageChannels") && interaction.member.id !== "912708332916195368") {
           await interaction.reply({
             content:
               "You need the Manage Channels permission to use this command.",
