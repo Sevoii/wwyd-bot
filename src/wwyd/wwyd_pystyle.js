@@ -1,6 +1,5 @@
 import axios from "axios";
-import { getWwyd } from "./wwyd_gen";
-import { AttachmentBuilder, EmbedBuilder, MessageFlags } from "discord.js";
+import { MessageFlags } from "discord.js";
 
 const API_URL = "https://pystyle.info/apps/mahjong-cpp_0.9.1/post.py";
 
@@ -200,7 +199,7 @@ const compressNotation = (tiles) => {
 const pct = (f) => `${(f * 100).toFixed(2)}%`;
 const pad = (s, n) => s.toString().padEnd(n, " ");
 
-export function formatAnalysisCompact(rows, limit = 10) {
+export function formatAnalysisCompact(rows, limit = 10, hide=false) {
   rows.sort((a, b) => b.value - a.value);
   const data = [...rows].slice(0, limit);
 
@@ -222,7 +221,7 @@ export function formatAnalysisCompact(rows, limit = 10) {
 
   // Wrap in code blocks (Discord field limit 1024 chars)
   const blocks = [];
-  let cur = "||```text\n";
+  let cur = (hide ? "||" : "") + "```text\n";
   for (const ln of lines) {
     if (cur.length + ln.length + 4 > 1024) {
       cur += "```";
@@ -231,7 +230,7 @@ export function formatAnalysisCompact(rows, limit = 10) {
     }
     cur += ln + "\n";
   }
-  cur += "```||";
+  cur += "```" + (hide ? "||" : "");
   blocks.push(cur);
   return blocks.join("\n");
 }

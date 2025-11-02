@@ -133,14 +133,14 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   // ]));
 };
 
-const generateDescription = ({ comment }) => {
-  return comment
+const generateDescription = ({ comment }, hide = false) => {
+  return (hide ? "||" : "") +  comment
     .map((x) =>
       x instanceof Array
         ? x.map((x) => `<:${x}:${EMOJI_MAPPINGS[x]}>`).join("")
         : x,
     )
-    .join("");
+    .join("") + (hide ? "||" : "");
 };
 
 const suitOrder = { m: 0, p: 1, s: 2, z: 3 };
@@ -214,16 +214,16 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   return message;
 };
 
-const generateAnswerMessage = async (i, answer) => {
+const generateAnswerMessage = async (i, answer, hide=false) => {
   const wwyd = getWwyd(i);
 
   const image = await generateImage(wwyd);
-  const description = generateDescription(wwyd);
+  const description = generateDescription(wwyd, hide);
 
   const wwydImg = new AttachmentBuilder(image, { name: "wwyd.png" });
 
   const embed = new EmbedBuilder()
-    .setTitle(`Answer: ${wwyd.answer}`)
+    .setTitle(`Answer: ${(hide ? "||" : "")}${wwyd.answer}${(hide ? "||" : "")}`)
     .setFields([
       {
         name: "Explanation",
@@ -240,7 +240,7 @@ const generateAnswerMessage = async (i, answer) => {
     embeds.push(
       new EmbedBuilder().addFields({
         name: "Pystyle Analysis",
-        value: formatAnalysisCompact(pystyleResp),
+        value: formatAnalysisCompact(pystyleResp, 10, hide),
       }),
     );
   }
@@ -249,6 +249,7 @@ const generateAnswerMessage = async (i, answer) => {
     embeds,
     files: [wwydImg],
     flags: MessageFlags.Ephemeral,
+    components: []
   };
 };
 

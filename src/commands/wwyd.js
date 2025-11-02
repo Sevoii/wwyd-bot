@@ -86,7 +86,7 @@ module.exports = {
           return;
         }
         await interaction.reply("OK")
-        interaction.client.emit("WWYD_Daily", interaction.client);
+        interaction.client.emit("WWYD_Daily", interaction.client, interaction.channel);
       } else if (subcommand === "leaderboard") {
         await interaction.reply(generateLeaderboard(interaction.guildId));
       } else if (subcommand === "score") {

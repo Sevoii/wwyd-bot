@@ -11,7 +11,7 @@ db.prepare(
 ).run();
 
 db.prepare(
-  `CREATE TABLE IF NOT EXISTS ${WWYD_DAILY} (guild_id VARCHAR(18), problem_id VARCHAR(16), created DATETIME DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (guild_id, problem_id))`,
+  `CREATE TABLE IF NOT EXISTS ${WWYD_DAILY} (guild_id VARCHAR(18), problem_id VARCHAR(16), internal_id INTEGER, channel_id VARCHAR(18), message_id VARCHAR(20), created DATETIME DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (guild_id, problem_id))`,
 ).run();
 
 db.prepare(
@@ -84,10 +84,10 @@ const GET_SCORE = db.prepare(`SELECT score
                                 AND discord_id = @discordId`);
 
 const SET_LATEST_WWYD = db.prepare(
-  `INSERT INTO ${WWYD_DAILY} (guild_id, problem_id) VALUES (@guildId, @problemId)`,
+  `INSERT INTO ${WWYD_DAILY} (guild_id, problem_id, internal_id, channel_id, message_id) VALUES (@guildId, @problemId, @internalId, @channelId, @messageId)`,
 );
 
-const GET_LATEST_WWYD = db.prepare(`SELECT problem_id
+const GET_LATEST_WWYD = db.prepare(`SELECT problem_id, internal_id, channel_id, message_id
                                     FROM ${WWYD_DAILY}
                                     WHERE guild_id = @guildId
                                     ORDER BY created DESC LIMIT 1`);
@@ -185,9 +185,9 @@ const getScore = (guildId, discordId) => {
   }
 };
 
-const setLatestWwyd = (guildId, problemId) => {
+const setLatestWwyd = (guildId, problemId, internalId, channelId, messageId) => {
   try {
-    SET_LATEST_WWYD.run({ guildId, problemId });
+    SET_LATEST_WWYD.run({ guildId, problemId, internalId, channelId, messageId });
   } catch (err) {
     console.error(err);
   }
@@ -202,6 +202,9 @@ const getPrevStats = (guildId) => {
 
       if (data1 && data2) {
         return {
+          channelId: data.channel_id,
+          messageId: data.message_id,
+          internalId: data.internal_id,
           successes: data1.successes ?? 0,
           attempts: data1.attempts ?? 0,
           answerers: data2.map(x => {return {discord_id: x.discord_id, score: x.score}})
