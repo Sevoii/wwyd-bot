@@ -9,7 +9,7 @@ db.prepare(
 ).run();
 
 db.prepare(
-  `CREATE TABLE IF NOT EXISTS ${SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), problem_id VARCHAR(8), correct BOOLEAN, PRIMARY KEY (guild_id, discord_id, problem_id))`,
+  `CREATE TABLE IF NOT EXISTS ${SCORES} (guild_id VARCHAR(18), discord_id VARCHAR(18), problem_id VARCHAR(16), correct INTEGER, PRIMARY KEY (guild_id, discord_id, problem_id))`,
 ).run();
 
 const GET_DAILY_ENABLED = db.prepare(`SELECT * FROM ${WWYD_CHANNELS}`);
@@ -67,18 +67,37 @@ const toggleDaily = (guildId, channelId) => {
         guildId,
       });
 
-      return 1;
+      return 0;
     } else {
       ENABLE_CH.run({
         guildId,
         channelId,
       });
 
-      return 2;
+      return 1;
     }
   } catch (err) {
     console.error(err);
-    return 0;
+    return -1;
+  }
+};
+
+const addScore = (guildId, discordId, problemId, correct) => {
+  try {
+    if (CHECK_SCORE_EXISTS.get({ guildId, discordId, problemId })) {
+      return 0;
+    } else {
+      INSERT_SCORE.run({
+        guildId,
+        discordId,
+        problemId,
+        correct,
+      });
+      return 1;
+    }
+  } catch (err) {
+    console.error(err);
+    return -1;
   }
 };
 
@@ -86,4 +105,5 @@ module.exports = {
   getDailyChannels,
   toggleDaily,
   deleteDailyChannels,
+  addScore,
 };

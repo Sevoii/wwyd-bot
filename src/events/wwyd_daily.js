@@ -1,28 +1,50 @@
-const { randomWwyd } = require("../wwyd/wwyd_gen");
-const { generateQuestionMessage } = require("../wwyd/generate_wwyd");
-const { getDailyChannels, deleteDailyChannels } = require("../wwyd/wwyd_db");
+const { Events, MessageFlags, EmbedBuilder } = require("discord.js");
+const { generateAnswerMessage } = require("../wwyd/generate_wwyd");
+const { getWwyd } = require("../wwyd/wwyd_gen");
+const { addScore } = require("../wwyd/wwyd_db");
 
 module.exports = {
-  name: "WWYD_Daily",
+  name: Events.InteractionCreate,
   once: false,
-  async execute(client) {
-    console.log("WWYD Sent Out");
+  async execute(interaction) {
+    if (!interaction.isButton()) return;
+    const buttonData = interaction.customId.split(":");
+    if (buttonData[0] !== "wwyd_daily") return;
 
-    const to_delete = [];
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    const message = await generateAnswerMessage(
+      parseInt(buttonData[1]),
+      buttonData[3],
+    );
 
-    for (let entry of getDailyChannels()) {
-      const channel = await client.channels.fetch(entry.channel_id);
+    const correct = buttonData[3] === getWwyd(parseInt(buttonData[1])).answer;
+    const res = addScore(
+      interaction.guildId,
+      interaction.member.id,
+      buttonData[2],
+      correct ? 1 : 0,
+    );
 
-      if (channel && channel.isTextBased()) {
-        const [i, wwyd] = randomWwyd();
-        const message = await generateQuestionMessage(i, wwyd, "wwyd_daily");
+    if (res === -1) {
+      await interaction.editReply({
+        content: "Could not save score to the database, please try again",
+        flags: MessageFlags.Ephemeral,
+      });
+    } else {
+      message.embeds.push(
+        new EmbedBuilder()
+          .setTitle(
+            res === 1
+              ? "Successfully saved score to database"
+              : "You already answered today",
+          )
+          .setColor(res === 1 ? "Green" : "Red"),
+      );
 
-        await channel.send(message);
-      } else {
-        to_delete.push(channel);
-      }
+      await interaction.editReply(message);
+      await interaction.channel.send(
+        `<@${interaction.member.id}> was correct!`,
+      );
     }
-
-    deleteDailyChannels(to_delete);
   },
 };

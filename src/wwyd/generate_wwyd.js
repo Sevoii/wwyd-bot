@@ -4,6 +4,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
   MessageFlags,
+  EmbedBuilder,
 } = require("discord.js");
 const sharp = require("sharp");
 const path = require("node:path");
@@ -16,6 +17,7 @@ const SEAT_MAPPINGS = {
 };
 
 const EMOJI_MAPPINGS = require("../assets/personal_emoji_mappings.json");
+const { getWwyd } = require("./wwyd_gen");
 
 const generateHeader = ({ seat, round, turn }) =>
   `Round:${SEAT_MAPPINGS[round]} Seat:${SEAT_MAPPINGS[seat]} Turn:${turn}`;
@@ -166,7 +168,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   const actionRows = [];
 
   const date = new Date();
-  const uuid = date.toISOString().slice(0, 10).replace(/-/g, '');
+  const uuid = date.toISOString().slice(0, 10).replace(/-/g, "") + "-" + i;
 
   for (let j = 0; j < options.length; j += 5) {
     actionRows.push(
@@ -204,10 +206,37 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   return message;
 };
 
+const generateAnswerMessage = async (i, answer) => {
+  const wwyd = getWwyd(i);
+
+  const image = await generateImage(wwyd);
+  const description = generateDescription(wwyd);
+
+  const wwydImg = new AttachmentBuilder(image, { name: "wwyd.png" });
+
+  const embed = new EmbedBuilder()
+    .setTitle(`Answer: ${wwyd.answer}`)
+    .setFields([
+      {
+        name: "Explanation",
+        value: description,
+        inline: false,
+      },
+    ])
+    .setColor(answer === wwyd.answer ? "Green" : "Red");
+
+  return {
+    embeds: [embed],
+    files: [wwydImg],
+    flags: MessageFlags.Ephemeral,
+  };
+};
+
 module.exports = {
   generateImage,
   generateHeader,
   generateDescription,
   getOptions,
   generateQuestionMessage,
+  generateAnswerMessage
 };
