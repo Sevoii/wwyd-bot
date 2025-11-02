@@ -18,6 +18,10 @@ const SEAT_MAPPINGS = {
 
 const EMOJI_MAPPINGS = require("../assets/personal_emoji_mappings.json");
 const { getWwyd } = require("./wwyd_gen");
+const {
+  analyzeWWYDSituation,
+  formatAnalysisCompact,
+} = require("./wwyd_pystyle");
 
 const generateHeader = ({ seat, round, turn }) =>
   `Round:${SEAT_MAPPINGS[round]} Seat:${SEAT_MAPPINGS[seat]} Turn:${turn}`;
@@ -229,8 +233,20 @@ const generateAnswerMessage = async (i, answer) => {
     ])
     .setColor(answer === wwyd.answer ? "Green" : "Red");
 
+  let embeds = [embed];
+
+  const pystyleResp = await analyzeWWYDSituation(i, wwyd);
+  if (pystyleResp) {
+    embeds.push(
+      new EmbedBuilder().addFields({
+        name: "Pystyle Analysis",
+        value: formatAnalysisCompact(pystyleResp),
+      }),
+    );
+  }
+
   return {
-    embeds: [embed],
+    embeds,
     files: [wwydImg],
     flags: MessageFlags.Ephemeral,
   };
