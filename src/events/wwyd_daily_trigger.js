@@ -21,12 +21,13 @@ const sendWwydMessage = async (client, guildId, channel) => {
     const channel = await client.channels.fetch(prevData.channelId);
 
     if (channel && channel.isTextBased()) {
-
       const message = await channel.messages.fetch(prevData.messageId);
       if (message) {
-        await message.edit(await generateAnswerMessage(prevData.internalId, null, true))
+        await message.edit(
+          await generateAnswerMessage(prevData.internalId, null, true),
+        );
       } else {
-        console.error("Message not found")
+        console.error("Message not found");
       }
     }
 
@@ -37,13 +38,21 @@ const sendWwydMessage = async (client, guildId, channel) => {
             new EmbedBuilder()
               .setTitle("WWYD Daily Recap")
               .setDescription(
-                `Successes: ${prevData.successes} - Failures: ${prevData.attempts - prevData.successes} - ${Math.floor((prevData.successes / prevData.attempts) * 100)}% \n\n` +
-                prevData.answerers
+                `Successes: ${prevData.successes} - Failures: ${prevData.attempts - prevData.successes} - ${Math.floor((prevData.successes / prevData.attempts) * 100)}%\nGuess Distribution: ${Object.entries(
+                  prevData.answerCounts,
+                )
+                  .sort(([keyA], [keyB]) => keyB.localeCompare(keyA)) // sort keys Z → A
+                  .map(([key, value]) => `${key}:${value}`)
+                  .join(", ")}`,
+              )
+              .addFields({
+                name: "Answerers",
+                value: prevData.answerers
                   .map(
                     (x, i) => `${i + 1}. <@${x.discord_id}> - ${x.score} pts`,
                   )
                   .join("\n"),
-              ),
+              }),
           ],
         });
       } catch (err) {

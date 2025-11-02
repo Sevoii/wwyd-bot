@@ -134,13 +134,17 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
 };
 
 const generateDescription = ({ comment }, hide = false) => {
-  return (hide ? "||" : "") +  comment
-    .map((x) =>
-      x instanceof Array
-        ? x.map((x) => `<:${x}:${EMOJI_MAPPINGS[x]}>`).join("")
-        : x,
-    )
-    .join("") + (hide ? "||" : "");
+  return (
+    (hide ? "||" : "") +
+    comment
+      .map((x) =>
+        x instanceof Array
+          ? x.map((x) => `<:${x}:${EMOJI_MAPPINGS[x]}>`).join("")
+          : x,
+      )
+      .join("") +
+    (hide ? "||" : "")
+  );
 };
 
 const suitOrder = { m: 0, p: 1, s: 2, z: 3 };
@@ -214,7 +218,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   return message;
 };
 
-const generateAnswerMessage = async (i, answer, hide=false) => {
+const generateAnswerMessage = async (i, answer, hide = false) => {
   const wwyd = getWwyd(i);
 
   const image = await generateImage(wwyd);
@@ -223,7 +227,7 @@ const generateAnswerMessage = async (i, answer, hide=false) => {
   const wwydImg = new AttachmentBuilder(image, { name: "wwyd.png" });
 
   const embed = new EmbedBuilder()
-    .setTitle(`Answer: ${(hide ? "||" : "")}${wwyd.answer}${(hide ? "||" : "")}`)
+    .setTitle(`Answer: ${hide ? "||" : ""}${wwyd.answer}${hide ? "||" : ""}`)
     .setFields([
       {
         name: "Explanation",
@@ -235,21 +239,25 @@ const generateAnswerMessage = async (i, answer, hide=false) => {
 
   let embeds = [embed];
 
-  const pystyleResp = await analyzeWWYDSituation(i, wwyd);
-  if (pystyleResp) {
-    embeds.push(
-      new EmbedBuilder().addFields({
-        name: "Pystyle Analysis",
-        value: formatAnalysisCompact(pystyleResp, 10, hide),
-      }),
-    );
+  try {
+    const pystyleResp = await analyzeWWYDSituation(i, wwyd);
+    if (pystyleResp) {
+      embeds.push(
+        new EmbedBuilder().addFields({
+          name: "Pystyle Analysis",
+          value: formatAnalysisCompact(pystyleResp, 10, hide),
+        }),
+      );
+    }
+  } catch (err) {
+    console.error(err);
   }
 
   return {
     embeds,
     files: [wwydImg],
     flags: MessageFlags.Ephemeral,
-    components: []
+    components: [],
   };
 };
 
