@@ -27,7 +27,8 @@ const generateScore = (guildId, discordId) => {
     return {
       embeds: [
         new EmbedBuilder()
-          .setTitle(`<@${discordId}>'s Score: ${score}`)
+          .setTitle("WWYD Daily Score")
+          .setDescription(`<@${discordId}>'s Score: ${score}`)
           .setColor("Green"),
       ],
     };
