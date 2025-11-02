@@ -1,3 +1,11 @@
+const {
+  AttachmentBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+  EmbedBuilder,
+} = require("discord.js");
 const sharp = require("sharp");
 const path = require("node:path");
 
@@ -120,38 +128,6 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   // ]));
 };
 
-const generateNoHeaderImage = async ({ hand, draw }) => {
-  const TILE_WIDTH = 80;
-  const TILE_GAP = 20;
-  const TILE_HEIGHT = 129;
-
-  hand = hand.slice();
-  hand.push(draw);
-
-  const composite = hand.map((x, index) => ({
-    input: path.join(__dirname, "../assets/tiles", `${x}.png`),
-    left:
-      index === hand.length - 1
-        ? index * TILE_WIDTH + TILE_GAP
-        : index * TILE_WIDTH,
-    top: 0,
-    width: TILE_WIDTH,
-    height: TILE_HEIGHT,
-  }));
-
-  return await sharp({
-    create: {
-      width: TILE_WIDTH * 14 + TILE_GAP + 10,
-      height: TILE_HEIGHT,
-      channels: 4,
-      background: { r: 255, g: 255, b: 255, alpha: 0 },
-    },
-  })
-    .composite(composite)
-    .toFormat("png", { quality: 100 })
-    .toBuffer();
-};
-
 const generateDescription = ({ comment }) => {
   return comment
     .map((x) =>
@@ -178,10 +154,58 @@ const getOptions = ({ hand, draw }) => {
   return hand.filter((item, index) => hand.indexOf(item) === index);
 };
 
+const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
+  const image = await generateImage(wwyd);
+  const options = getOptions(wwyd);
+
+  const wwydImg = new AttachmentBuilder(image, { name: "wwyd.png" });
+
+  // const embed = new EmbedBuilder()
+  // .setTitle(`What would you do?`);
+  // .setImage("attachment://wwyd.png");
+
+  const actionRows = [];
+
+  for (let j = 0; j < options.length; j += 5) {
+    actionRows.push(
+      new ActionRowBuilder().addComponents(
+        options.slice(j, j + 5).map((x) =>
+          new ButtonBuilder()
+            .setCustomId(`${label}:${i}:${x}`)
+            .setLabel(x)
+            // .setEmoji(EMOJI_MAPPINGS[x])
+            .setStyle(ButtonStyle.Primary),
+        ),
+      ),
+    );
+  }
+
+  actionRows.push(
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(`wwyd:${i}:pass`)
+        .setLabel("pass")
+        .setStyle(ButtonStyle.Danger),
+    ),
+  );
+
+  const message = {
+    // embeds: [embed],
+    files: [wwydImg],
+    components: actionRows,
+  };
+
+  if (ephemeral) {
+    message.flags = MessageFlags.Ephemeral;
+  }
+
+  return message;
+};
+
 module.exports = {
   generateImage,
-  generateNoHeaderImage,
   generateHeader,
   generateDescription,
   getOptions,
+  generateQuestionMessage,
 };
