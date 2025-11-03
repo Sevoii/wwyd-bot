@@ -1,5 +1,5 @@
 const { Events, MessageFlags, EmbedBuilder } = require("discord.js");
-const { generateAnswerMessage } = require("../wwyd/generate_wwyd");
+const { generateAnswerMessage } = require("../wwyd/wwyd_discord");
 const { getWwyd } = require("../wwyd/wwyd_gen");
 const { addScore } = require("../wwyd/wwyd_db");
 

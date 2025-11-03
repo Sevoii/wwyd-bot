@@ -3,7 +3,7 @@ const {
   generateQuestionMessage,
   generateAnswerMessage,
   getWwydUUID,
-} = require("../wwyd/generate_wwyd");
+} = require("../wwyd/wwyd_discord");
 const {
   getDailyChannels,
   deleteDailyChannels,

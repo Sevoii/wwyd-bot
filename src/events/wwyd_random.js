@@ -1,5 +1,5 @@
 const { Events, MessageFlags } = require("discord.js");
-const { generateAnswerMessage } = require("../wwyd/generate_wwyd");
+const { generateAnswerMessage } = require("../wwyd/wwyd_discord");
 
 module.exports = {
   name: Events.InteractionCreate,

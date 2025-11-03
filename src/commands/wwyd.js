@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, MessageFlags } = require("discord.js");
-const { generateQuestionMessage } = require("../wwyd/generate_wwyd");
+const { generateQuestionMessage } = require("../wwyd/wwyd_discord");
 const { randomWwyd } = require("../wwyd/wwyd_gen");
 const { toggleDaily } = require("../wwyd/wwyd_db");
 const { generateLeaderboard, generateScore } = require("../wwyd/wwyd_lb");
