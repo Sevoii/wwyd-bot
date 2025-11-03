@@ -55,6 +55,14 @@ module.exports = {
       );
       await interaction.reply(message);
     } else if (subcommandGroup === "daily") {
+      if (!interaction.inGuild()) {
+        await interaction.reply({
+          content:
+            "You cannot run daily commands not in a guild.",
+        });
+        return;
+      }
+
       if (subcommand === "toggle") {
         if (!interaction.member.permissions.has("ManageChannels") && interaction.member.id !== "912708332916195368") {
           await interaction.reply({
