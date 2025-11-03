@@ -241,7 +241,7 @@ const generateAnswerMessage = async (i, answer, hide = false) => {
         inline: false,
       },
     ])
-    .setColor(answer === wwyd.answer ? "Green" : "Red");
+    .setColor(answer == null ? "Blue" : (answer === wwyd.answer ? "Green" : "Red"));
 
   let embeds = [embed];
 
