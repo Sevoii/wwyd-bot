@@ -196,7 +196,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
             .setCustomId(`${label}:${i}:${uuid}:${x}`)
             .setLabel(x)
             // .setEmoji(EMOJI_MAPPINGS[x])
-            .setStyle(STYLE_MAPPING[x[1]]),
+            .setStyle(STYLE_MAPPING[x[1]] ?? ButtonStyle.Primary),
         ),
       ),
     );
