@@ -1,4 +1,4 @@
-const { Events } = require("discord.js");
+const { Events, ActivityType } = require("discord.js");
 const schedule = require("node-schedule");
 
 module.exports = {
@@ -6,6 +6,9 @@ module.exports = {
   once: true,
   execute(client) {
     console.log(`Ready! Logged in as ${client.user.tag}`);
+    client.user.setActivity("Invite me to your server!", {
+      type: ActivityType.Watching,
+    });
 
     const rule = new schedule.RecurrenceRule();
     rule.hour = 15;
