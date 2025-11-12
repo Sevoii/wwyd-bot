@@ -23,6 +23,10 @@ const {
   formatAnalysisCompact,
 } = require("./wwyd_pystyle");
 
+const formatTile = (tile) => {
+  return `<:${tile}:${EMOJI_MAPPINGS[tile]}>`;
+};
+
 const generateHeader = ({ seat, round, turn }) =>
   `Round:${SEAT_MAPPINGS[round]} Seat:${SEAT_MAPPINGS[seat]} Turn:${turn}`;
 
@@ -139,7 +143,7 @@ const generateDescription = ({ comment }, hide = false) => {
     comment
       .map((x) =>
         x instanceof Array
-          ? x.map((x) => `<:${x}:${EMOJI_MAPPINGS[x]}>`).join("")
+          ? x.map(formatTile).join("")
           : x,
       )
       .join("") +
@@ -233,7 +237,9 @@ const generateAnswerMessage = async (i, answer, hide = false) => {
   const wwydImg = new AttachmentBuilder(image, { name: "wwyd.png" });
 
   const embed = new EmbedBuilder()
-    .setTitle(`Answer: ${hide ? "||" : ""}${wwyd.answer}${hide ? "||" : ""}`)
+    .setTitle(
+      `Answer: ${hide ? "||" : ""}${formatTile(wwyd.answer)}${hide ? "||" : ""}`,
+    )
     .setFields([
       {
         name: "Explanation",
@@ -241,7 +247,9 @@ const generateAnswerMessage = async (i, answer, hide = false) => {
         inline: false,
       },
     ])
-    .setColor(answer == null ? "Blue" : (answer === wwyd.answer ? "Green" : "Red"));
+    .setColor(
+      answer == null ? "Blue" : answer === wwyd.answer ? "Green" : "Red",
+    );
 
   let embeds = [embed];
 
