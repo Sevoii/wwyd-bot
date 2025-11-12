@@ -42,21 +42,23 @@ const sendWwydMessage = async (client, guildId, channel) => {
             new EmbedBuilder()
               .setTitle("WWYD Daily Recap")
               .setDescription(
-                `Successes: ${prevData.successes} - Failures: ${prevData.attempts - prevData.successes} - ${Math.floor((prevData.successes / prevData.attempts) * 100)}%\nGuess Distribution: ${Object.entries(
+                `Successes: ${prevData.successes} - Failures: ${prevData.attempts - prevData.successes} - Rate: ${Math.floor((prevData.successes / prevData.attempts) * 100)}%\nGuess Distribution: ${Object.entries(
                   prevData.answerCounts,
                 )
                   .sort(([keyA], [keyB]) => keyB.localeCompare(keyA)) // sort keys Z → A
                   .map(([key, value]) => `${key}:${value}`)
                   .join(", ")}`,
               )
-              .addFields({
-                name: "Answerers",
-                value: prevData.answerers
-                  .map(
-                    (x, i) => `${i + 1}. <@${x.discord_id}> - ${x.score} pts`,
-                  )
-                  .join("\n"),
-              }),
+              .setColor("#d9a441")
+              // .setColor("Green")
+              // .addFields({
+              //   name: "Correct Answerers",
+              //   value: prevData.answerers
+              //     .map(
+              //       (x, i) => `${i + 1}. <@${x.discord_id}> - ${x.score} pts`,
+              //     )
+              //     .join("\n"),
+              // }),
           ],
         });
       } catch (err) {
