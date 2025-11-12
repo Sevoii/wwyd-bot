@@ -23,9 +23,13 @@ const sendWwydMessage = async (client, guildId, channel) => {
     if (channel && channel.isTextBased()) {
       const message = await channel.messages.fetch(prevData.messageId);
       if (message) {
-        await message.edit(
-          await generateAnswerMessage(prevData.internalId, null, true),
-        );
+        try {
+          await message.edit(
+            await generateAnswerMessage(prevData.internalId, null, true),
+          );
+        } catch (err) {
+          console.error(err);
+        }
       } else {
         console.error("Message not found");
       }
