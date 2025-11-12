@@ -1,5 +1,6 @@
 const db = require("better-sqlite3")("wwyd.db");
 db.pragma("journal_mode = WAL");
+const fs = require("fs");
 
 const WWYD_CHANNELS = "WwydChannels";
 const WWYD_DAILY = "WwydDaily";
@@ -255,6 +256,20 @@ const getPrevStats = (guildId) => {
   }
 };
 
+const backupDb = () => {
+  if (!fs.existsSync("backups")) {
+    fs.mkdirSync("backups");
+  }
+
+  db.backup(`backups/backup-${Date.now()}.db`)
+    .then(() => {
+      console.log("Backup complete");
+    })
+    .catch((err) => {
+      console.error("Backup failed:", err);
+    });
+};
+
 module.exports = {
   getDailyChannels,
   toggleDaily,
@@ -264,4 +279,5 @@ module.exports = {
   getScore,
   setLatestWwyd,
   getPrevStats,
+  backupDb,
 };

@@ -1,5 +1,6 @@
 const { Events, ActivityType } = require("discord.js");
 const schedule = require("node-schedule");
+const { backupDb } = require("../wwyd/wwyd_db");
 
 module.exports = {
   name: Events.ClientReady,
@@ -7,7 +8,7 @@ module.exports = {
   execute(client) {
     console.log(`Ready! Logged in as ${client.user.tag}`);
     client.user.setActivity("Invite me to your server!", {
-      type: ActivityType.Watching,
+      type: ActivityType.Custom,
     });
 
     const rule = new schedule.RecurrenceRule();
@@ -17,6 +18,7 @@ module.exports = {
 
     schedule.scheduleJob(rule, () => {
       client.emit("WWYD_Daily", client);
+      backupDb();
     });
   },
 };
