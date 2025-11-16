@@ -10023,8 +10023,8 @@
 		"turn": "7",
 		"indicator": "9m",
 		"hand": [
+			"3m",
 			"4m",
-			"6m",
 			"7m",
 			"7m",
 			"7m",
@@ -10037,7 +10037,7 @@
 			"5s",
 			"5s"
 		],
-		"draw": "3s",
+		"draw": "6m",
 		"answer": "6m",
 		"comment": [
 			"two choices: ",
