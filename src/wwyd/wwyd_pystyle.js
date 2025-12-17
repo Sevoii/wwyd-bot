@@ -61,8 +61,14 @@ function generateWall(tiles) {
 export function convertWwydToApiFormat(wwyd) {
   // Convert hand tiles (13 tiles) and draw tile (1 tile) to numbers
   const handTiles = wwyd.hand.map(convertTileToNumber);
-  const drawTile = convertTileToNumber(wwyd.draw);
-  const allHandTiles = [...handTiles, drawTile];
+
+  let allHandTiles;
+  if (wwyd.draw) {
+    const drawTile = convertTileToNumber(wwyd.draw);
+    allHandTiles = [...handTiles, drawTile];
+  } else {
+    allHandTiles = handTiles;
+  }
 
   // Convert dora indicator
   const doraIndicator = convertTileToNumber(wwyd.indicator);
@@ -143,8 +149,8 @@ function convertResponseData(response, turn) {
 
 const cache = {};
 
-export async function analyzeWWYDSituation(i, wwyd) {
-  if (cache[i]) {
+export async function analyzeWWYDSituation(i, wwyd, use_cache = true) {
+  if (cache[i] && use_cache) {
     return cache[i];
   }
 
@@ -199,7 +205,7 @@ const compressNotation = (tiles) => {
 const pct = (f) => `${(f * 100).toFixed(2)}%`;
 const pad = (s, n) => s.toString().padEnd(n, " ");
 
-export function formatAnalysisCompact(rows, limit = 10, hide=false) {
+export function formatAnalysisCompact(rows, limit = 10, hide = false) {
   rows.sort((a, b) => b.value - a.value);
   const data = [...rows].slice(0, limit);
 
