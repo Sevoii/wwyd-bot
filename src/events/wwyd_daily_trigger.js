@@ -42,7 +42,7 @@ const sendWwydMessage = async (client, guildId, channel) => {
             new EmbedBuilder()
               .setTitle("WWYD Daily Recap")
               .setDescription(
-                `Successes: ${prevData.successes} - Failures: ${prevData.attempts - prevData.successes} - Rate: ${Math.floor((prevData.successes / prevData.attempts) * 100)}%\nGuess Distribution: ${Object.entries(
+                `Successes: ${prevData.successes} - Total: ${prevData.attempts} - Success Rate: ${Math.floor((prevData.successes / prevData.attempts) * 100)}%\nGuess Distribution: ${Object.entries(
                   prevData.answerCounts,
                 )
                   .sort(([keyA], [keyB]) => keyB.localeCompare(keyA)) // sort keys Z → A
