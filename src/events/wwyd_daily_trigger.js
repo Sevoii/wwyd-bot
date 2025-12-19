@@ -1,4 +1,4 @@
-const { randomWwyd } = require("../wwyd/wwyd_gen");
+const { randomWwydDaily } = require("../wwyd/wwyd_gen");
 const {
   generateQuestionMessage,
   generateAnswerMessage,
@@ -13,7 +13,7 @@ const {
 const { EmbedBuilder } = require("discord.js");
 
 const sendWwydMessage = async (client, guildId, channel) => {
-  const [i, wwyd] = randomWwyd();
+  const [i, wwyd] = randomWwydDaily(guildId);
   const uuid = getWwydUUID(i, wwyd);
 
   const prevData = getPrevStats(guildId);
