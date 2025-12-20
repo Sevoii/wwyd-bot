@@ -1,32 +1,32 @@
-const wwyd = require("./assets/wwyd_pystyle.json");
+const wwyd = require("./assets/wwyd.json");
 const {
   convertWwydToApiFormat,
   convertResponseData,
 } = require("./wwyd/wwyd_pystyle");
 const fs = require("fs");
 const axios = require("axios");
-// const { SocksProxyAgent } = require("socks-proxy-agent");
-// const proxies = require("./assets/socks_proxies.json").map((x) => {
-//   [host, port, username, password] = x.split(":");
-//   return new SocksProxyAgent(
-//     `socks5://${username}:${password}@${host}:${port}`,
-//   );
-// });
+const { SocksProxyAgent } = require("socks-proxy-agent");
+const proxies = require("./assets/socks_proxies.json").map((x) => {
+  [host, port, username, password] = x.split(":");
+  return new SocksProxyAgent(
+    `socks5://${username}:${password}@${host}:${port}`,
+  );
+});
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// const API_URL = "https://pystyle.info/apps/mahjong-cpp_0.9.1/post.py";
-const API_URL = "http://localhost:8002/";
+const API_URL = "https://pystyle.info/apps/mahjong-cpp_0.9.1/post.py";
+// const API_URL = "http://localhost:8002/";
 
 (async () => {
   let c = 0;
   for (let i of wwyd) {
-    if (i.pystyle) continue;
+    if (!i.pystyle.length) continue;
 
     if (++c % 10 === 0) {
       console.log(`Parsing ${c}'th wwyd`);
       fs.writeFileSync(
-        "./assets/wwyd_pystyle.json",
+        "./assets/wwyd.json",
         JSON.stringify(wwyd, null, 2),
         "utf8",
       );
@@ -36,7 +36,7 @@ const API_URL = "http://localhost:8002/";
 
     let resp;
     while (!resp) {
-      // const agent = proxies[Math.floor(Math.random() * proxies.length)];
+      const agent = proxies[Math.floor(Math.random() * proxies.length)];
 
       try {
         const request = await axios.post(API_URL, data, {
@@ -44,7 +44,7 @@ const API_URL = "http://localhost:8002/";
             "Content-Type": "application/json",
           },
           timeout: 5000,
-          // httpsAgent: agent,
+          httpsAgent: agent,
         });
 
         resp = request.data;
@@ -55,14 +55,9 @@ const API_URL = "http://localhost:8002/";
       }
     }
 
-    i.pystyle = convertResponseData(resp, parseInt(wwyd.turn));
-
-    await sleep(500)
+    i.pystyle = convertResponseData(resp, parseInt(i.turn));
+    await sleep(500);
   }
 
-  fs.writeFileSync(
-    "./assets/wwyd_pystyle.json",
-    JSON.stringify(wwyd, null, 2),
-    "utf8",
-  );
+  fs.writeFileSync("./assets/wwyd.json", JSON.stringify(wwyd, null, 2), "utf8");
 })().catch(console.error);
