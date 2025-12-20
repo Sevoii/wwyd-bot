@@ -1,5 +1,4 @@
-import axios from "axios";
-import { MessageFlags } from "discord.js";
+const axios = require("axios");
 
 const API_URL = "https://pystyle.info/apps/mahjong-cpp_0.9.1/post.py";
 
@@ -58,7 +57,7 @@ function generateWall(tiles) {
   return wall;
 }
 
-export function convertWwydToApiFormat(wwyd) {
+function convertWwydToApiFormat(wwyd) {
   // Convert hand tiles (13 tiles) and draw tile (1 tile) to numbers
   const handTiles = wwyd.hand.map(convertTileToNumber);
 
@@ -94,7 +93,7 @@ export function convertWwydToApiFormat(wwyd) {
   };
 }
 
-export async function getMahjongAnalysis(data) {
+async function getMahjongAnalysis(data) {
   try {
     const response = await axios.post(API_URL, data, {
       headers: {
@@ -147,19 +146,11 @@ function convertResponseData(response, turn) {
   return options;
 }
 
-const cache = {};
-
-export async function analyzeWWYDSituation(i, wwyd, use_cache = true) {
-  if (cache[i] && use_cache) {
-    return cache[i];
-  }
-
+async function analyzeWWYDSituation(i, wwyd) {
   const apiData = convertWwydToApiFormat(wwyd);
   const response = await getMahjongAnalysis(apiData);
   if (response.success === true) {
-    const data = convertResponseData(response, parseInt(wwyd.turn));
-    cache[i] = data;
-    return data;
+    return convertResponseData(response, parseInt(wwyd.turn));
   } else {
     console.error(response.err_msg);
   }
@@ -205,7 +196,7 @@ const compressNotation = (tiles) => {
 const pct = (f) => `${(f * 100).toFixed(2)}%`;
 const pad = (s, n) => s.toString().padEnd(n, " ");
 
-export function formatAnalysisCompact(rows, limit = 10, hide = false) {
+function formatAnalysisCompact(rows, limit = 10, hide = false) {
   rows.sort((a, b) => b.value - a.value);
   const data = [...rows].slice(0, limit);
 
@@ -239,4 +230,12 @@ export function formatAnalysisCompact(rows, limit = 10, hide = false) {
   cur += "```" + (hide ? "||" : "");
   blocks.push(cur);
   return blocks.join("\n");
+}
+
+module.exports = {
+  convertWwydToApiFormat,
+  getMahjongAnalysis,
+  analyzeWWYDSituation,
+  formatAnalysisCompact,
+  convertResponseData
 }
