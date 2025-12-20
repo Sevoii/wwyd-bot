@@ -1,5 +1,4 @@
 const axios = require("axios");
-const { MessageFlags } = require("discord.js");
 
 const API_URL = "https://pystyle.info/apps/mahjong-cpp_0.9.1/post.py";
 
@@ -141,19 +140,11 @@ function convertResponseData(response, turn) {
   return options;
 }
 
-const cache = {};
-
 async function analyzeWWYDSituation(i, wwyd) {
-  if (cache[i]) {
-    return cache[i];
-  }
-
   const apiData = convertWwydToApiFormat(wwyd);
   const response = await getMahjongAnalysis(apiData);
   if (response.success === true) {
-    const data = convertResponseData(response, parseInt(wwyd.turn));
-    cache[i] = data;
-    return data;
+    return convertResponseData(response, parseInt(wwyd.turn));
   } else {
     console.error(response.err_msg);
   }

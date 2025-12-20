@@ -254,8 +254,9 @@ const generateAnswerMessage = async (i, answer, hide = false) => {
   let embeds = [embed];
 
   try {
-    const pystyleResp = await analyzeWWYDSituation(i, wwyd);
-    if (pystyleResp) {
+    // const pystyleResp = await analyzeWWYDSituation(i, wwyd);
+    const pystyleResp = wwyd.pystyle;
+    if (pystyleResp?.length) {
       embeds.push(
         new EmbedBuilder().addFields({
           name: "Pystyle Analysis",
