@@ -13,7 +13,7 @@ const {
 const { EmbedBuilder } = require("discord.js");
 
 const sendWwydMessage = async (client, guildId, channel) => {
-  const [i, wwyd] = randomWwydDaily(guildId);
+  const [i, wwyd] = randomWwydDaily(parseInt(guildId.substring(1, 10)));
   const uuid = getWwydUUID(i, wwyd);
 
   const prevData = getPrevStats(guildId);
