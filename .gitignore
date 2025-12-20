@@ -5,3 +5,4 @@ wwyd.db
 wwyd.db-shm
 wwyd.db-wal
 backups
+socks_proxies.json
