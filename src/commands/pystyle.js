@@ -27,14 +27,17 @@ const parseTiles = (hand) => {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("pystyle")
-    .setDescription("PYStyle API")
+    .setDescription("Evalutes an inputted hand using PyStyle")
     .addStringOption((option) =>
-      option.setName("hand").setDescription("Mahjong Hand").setRequired(true),
+      option.setName("hand").setDescription("Base Mahjong Hand (13 Tiles)").setRequired(true),
+    )
+    .addStringOption((option) =>
+      option.setName("draw").setDescription("Drawn tile").setRequired(true),
     )
     .addStringOption((option) =>
       option
         .setName("seat_wind")
-        .setDescription("seat wind (E, S, W, N)")
+        .setDescription("Seat Wind (E, S, W, N)")
         .setRequired(true)
         .setMinLength(1)
         .setMaxLength(1)
@@ -48,7 +51,7 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("round_wind")
-        .setDescription("Select a round wind (E, S, W, N)")
+        .setDescription("Round wind (E, S, W, N)")
         .setRequired(true)
         .setMinLength(1)
         .setMaxLength(1)
@@ -62,29 +65,38 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("dora_indicator")
-        .setDescription("Dora Indicator")
+        .setDescription("Dora Indicator [NOT DORA]")
         .setRequired(true)
         .setMinLength(2)
         .setMaxLength(2),
     )
-    .addNumberOption((option) => option.setName("turn").setDescription("current turn")),
+    .addNumberOption((option) => option.setName("turn").setDescription("Current Turn")),
   async execute(interaction) {
     const hand = interaction.options.getString("hand");
+    const draw = interaction.options.getString("draw");
     const turn = interaction.options.getNumber("turn") || 1;
     const tiles = parseTiles(hand);
     const doraIndicator = interaction.options.getString("dora_indicator");
 
-    if (tiles.length !== 14) {
+    if (tiles.length !== 13) {
       return await interaction.reply({
-        content: "invalid hand " + tiles.join(""),
+        content: "Invalid Hand " + tiles.join("") + ", expected 13 tiles but received " + tiles.length + " tiles",
         ephemeral: true,
       });
     }
 
-    const isValid = /^[0-9][mps]$|^[1-7]z$/.test(doraIndicator);
-    if (!isValid) {
+    const tileRe = /^[0-9][mps]$|^[1-7]z$/;
+
+    if (!tileRe.test(doraIndicator)) {
       return await interaction.reply({
-        content: "invalid dora indicator " + doraIndicator,
+        content: "Invalid Dora Indicator: " + doraIndicator,
+        ephemeral: true,
+      });
+    }
+
+    if (!tileRe.test(draw)) {
+      return await interaction.reply({
+        content: "Invalid Drawn Tile: " + draw,
         ephemeral: true,
       });
     }
@@ -97,16 +109,17 @@ module.exports = {
       turn,
       indicator: doraIndicator,
       hand: tiles,
+      draw
     };
 
-    const response = await analyzeWWYDSituation(0, wwyd, false);
+    const response = await analyzeWWYDSituation(0, wwyd);
     if (response) {
       await interaction.editReply({
         embeds: [
           new EmbedBuilder().addFields({
             name:
               "Pystyle Analysis on " +
-              hand +
+              hand + draw +
               " dora " +
               doraIndicator +
               " turn " +
@@ -117,7 +130,7 @@ module.exports = {
         flags: MessageFlags.Ephemeral,
       });
     } else {
-      await interaction.editReply("could not call api");
+      await interaction.editReply("PyStyle API returned an error");
     }
   },
 };
