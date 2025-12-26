@@ -249,7 +249,10 @@ const generateAnswerMessage = async (i, answer, hide = false) => {
     ])
     .setColor(
       answer == null ? "Blue" : answer === wwyd.answer ? "Green" : "Red",
-    );
+    )
+    .setFooter({
+      text: `Source: ${wwyd.source}`
+    });
 
   let embeds = [embed];
 
