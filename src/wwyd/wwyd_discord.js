@@ -137,7 +137,7 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   // ]));
 };
 
-const generateDescription = ({ comment }, hide = false) => {
+const generateDescription = ({ comment, source }, hide = false) => {
   return (
     (hide ? "||" : "") +
     comment
@@ -147,6 +147,7 @@ const generateDescription = ({ comment }, hide = false) => {
           : x,
       )
       .join("") +
+      "Source: " + source +
     (hide ? "||" : "")
   );
 };
