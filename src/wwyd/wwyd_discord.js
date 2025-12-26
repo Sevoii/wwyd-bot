@@ -137,7 +137,7 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   // ]));
 };
 
-const generateDescription = ({ comment, source }, hide = false) => {
+const generateDescription = ({ comment }, hide = false) => {
   return (
     (hide ? "||" : "") +
     comment
