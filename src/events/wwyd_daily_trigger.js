@@ -18,9 +18,15 @@ const sendWwydMessage = async (client, guildId, channel) => {
 
   const prevData = getPrevStats(guildId);
   if (prevData) {
-    const channel = await client.channels.fetch(prevData.channelId);
+    let channel;
 
-    if (channel && channel.isTextBased()) {
+    try {
+      channel = await client.channels.fetch(prevData.channelId);
+    } catch (err) {
+      console.error(err);
+    }
+
+    if (channel?.isTextBased()) {
       const message = await channel.messages.fetch(prevData.messageId);
       if (message) {
         try {
