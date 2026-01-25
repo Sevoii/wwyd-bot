@@ -141,11 +141,7 @@ const generateDescription = ({ comment }, hide = false) => {
   return (
     (hide ? "||" : "") +
     comment
-      .map((x) =>
-        x instanceof Array
-          ? x.map(formatTile).join("")
-          : x,
-      )
+      .map((x) => (x instanceof Array ? x.map(formatTile).join("") : x))
       .join("") +
     (hide ? "||" : "")
   );
@@ -240,22 +236,27 @@ const generateAnswerMessage = async (i, answer, hide = false) => {
     .setTitle(
       `Answer: ${hide ? "||" : ""}${formatTile(wwyd.answer)}${hide ? "||" : ""}`,
     )
-    .setFields([
-      {
-        name: "Explanation",
-        value: description,
-        inline: false,
-      },
-    ])
+    .setDescription(description)
+    // .setFields([
+    //   {
+    //     name: "Explanation",
+    //     value: description,
+    //     inline: false,
+    //   },
+    // ])
     .setColor(
       answer == null ? "Blue" : answer === wwyd.answer ? "Green" : "Red",
-    );
+    )
+    .setFooter({
+      text: `Source: ${wwyd.source}`,
+    });
 
   let embeds = [embed];
 
   try {
-    const pystyleResp = await analyzeWWYDSituation(i, wwyd);
-    if (pystyleResp) {
+    // const pystyleResp = await analyzeWWYDSituation(i, wwyd);
+    const pystyleResp = wwyd.pystyle;
+    if (pystyleResp?.length) {
       embeds.push(
         new EmbedBuilder().addFields({
           name: "Pystyle Analysis",

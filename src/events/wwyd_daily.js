@@ -47,7 +47,7 @@ module.exports = {
 
       if (res === 1 && correct) {
         await interaction.channel.send(
-          `<@${interaction.member.id}> was correct!`,
+          `<@${interaction.member.id}> answered correctly!`,
         );
       }
     }
