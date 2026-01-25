@@ -16,7 +16,7 @@ const SEAT_MAPPINGS = {
   N: "\u5317",
 };
 
-const EMOJI_MAPPINGS = require("../assets/personal_emoji_mappings.json");
+const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
 const { getWwyd } = require("./wwyd_gen");
 const {
   analyzeWWYDSituation,
@@ -24,7 +24,7 @@ const {
 } = require("./wwyd_pystyle");
 
 const formatTile = (tile) => {
-  return `<:${tile}:${EMOJI_MAPPINGS[tile]}>`;
+  return EMOJI_MAPPINGS[tile];
 };
 
 const generateHeader = ({ seat, round, turn }) =>
