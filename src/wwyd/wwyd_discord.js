@@ -18,10 +18,7 @@ const SEAT_MAPPINGS = {
 
 const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
 const { getWwyd } = require("./wwyd_gen");
-const {
-  analyzeWWYDSituation,
-  formatAnalysisCompact,
-} = require("./wwyd_pystyle");
+const { formatAnalysisCompact } = require("./wwyd_pystyle");
 
 const formatTile = (tile) => {
   return EMOJI_MAPPINGS[tile];
@@ -256,7 +253,7 @@ const generateAnswerMessage = async (i, answer, hide = false) => {
   try {
     // const pystyleResp = await analyzeWWYDSituation(i, wwyd);
     const pystyleResp = wwyd.pystyle;
-    if (pystyleResp?.length) {
+    if (pystyleResp != null) {
       embeds.push(
         new EmbedBuilder().addFields({
           name: "Pystyle Analysis",

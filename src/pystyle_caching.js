@@ -58,13 +58,13 @@ const formatJson = (arr) => {
           await sleep(5000);
         } else {
           console.error(e);
-          resp = [];
+          resp = null;
           break;
         }
       }
     }
 
-    i.pystyle = resp.length ? convertResponseData(resp, parseInt(i.turn)) : resp;
+    i.pystyle = resp != null ? convertResponseData(resp, parseInt(i.turn)) : resp;
     await sleep(500);
   }
 
