@@ -95,7 +95,7 @@ module.exports = {
         try {
           channel = await client.channels.fetch(entry.channel_id);
         } catch (err) {
-          console.error(err);
+          console.error(`Could not get channel for guild ${entry.guild_id} channelid ${entry.channel_id} \n ${err}`);
         }
 
         if (channel && channel.isTextBased()) {
