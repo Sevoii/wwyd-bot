@@ -55,16 +55,16 @@ const sendWwydMessage = async (client, guildId, channel) => {
                   .map(([key, value]) => `${key}:${value}`)
                   .join(", ")}`,
               )
-              .setColor("#d9a441")
-              // .setColor("Green")
-              // .addFields({
-              //   name: "Correct Answerers",
-              //   value: prevData.answerers
-              //     .map(
-              //       (x, i) => `${i + 1}. <@${x.discord_id}> - ${x.score} pts`,
-              //     )
-              //     .join("\n"),
-              // }),
+              .setColor("#d9a441"),
+            // .setColor("Green")
+            // .addFields({
+            //   name: "Correct Answerers",
+            //   value: prevData.answerers
+            //     .map(
+            //       (x, i) => `${i + 1}. <@${x.discord_id}> - ${x.score} pts`,
+            //     )
+            //     .join("\n"),
+            // }),
           ],
         });
       } catch (err) {
@@ -91,7 +91,12 @@ module.exports = {
       const to_delete = [];
 
       for (let entry of getDailyChannels()) {
-        const channel = await client.channels.fetch(entry.channel_id);
+        let channel;
+        try {
+          channel = await client.channels.fetch(entry.channel_id);
+        } catch (err) {
+          console.error(err);
+        }
 
         if (channel && channel.isTextBased()) {
           await sendWwydMessage(client, entry.guild_id, channel);
