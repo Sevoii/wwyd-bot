@@ -1,10 +1,11 @@
 require("dotenv").config({ path: "./.env" });
-const {
-  Client,
-  GatewayIntentBits,
-} = require("discord.js");
+const { Client, GatewayIntentBits } = require("discord.js");
 const { loadCommands } = require("./commands/load_commands");
 const { loadEvents } = require("./events/load_events");
+
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled promise rejection:", error);
+});
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
