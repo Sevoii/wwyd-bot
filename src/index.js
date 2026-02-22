@@ -9,7 +9,14 @@ process.on("unhandledRejection", (error) => {
 });
 
 (async () => {
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      ...(process.env.USES_PRIVILEGED === "true"
+        ? [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+        : []),
+    ],
+  });
   const db = new Database({
     connection_type: "local_sqlite3",
     run_migrations: true,
