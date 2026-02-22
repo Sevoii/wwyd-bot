@@ -18,32 +18,32 @@ const sendWwydMessage = async (client, guildId, channel) => {
 
   const prevData = getPrevStats(guildId);
   if (prevData) {
-    let channel;
+    let prevChannel;
 
     try {
-      channel = await client.channels.fetch(prevData.channelId);
+      prevChannel = await client.channels.fetch(prevData.channelId);
     } catch (err) {
-      console.error(err);
+      console.error(`Could not fetch prev channel for guildId ${guildId}`, err);
     }
 
-    if (channel?.isTextBased()) {
-      const message = await channel.messages.fetch(prevData.messageId);
+    if (prevChannel?.isTextBased()) {
+      const message = await prevChannel.messages.fetch(prevData.messageId);
       if (message) {
         try {
           await message.edit(
             await generateAnswerMessage(prevData.internalId, null, true),
           );
         } catch (err) {
-          console.error(err);
+          console.error(`Could not edit message ${prevData.messageId} for guild ${guildId}`, err);
         }
       } else {
-        console.error("Message not found");
+        console.error(`Message not found ${prevData.messageId} for guild ${guildId}`);
       }
     }
 
     if (prevData.attempts !== 0) {
       try {
-        await channel.send({
+        await prevChannel.send({
           embeds: [
             new EmbedBuilder()
               .setTitle("WWYD Daily Recap")
@@ -68,15 +68,19 @@ const sendWwydMessage = async (client, guildId, channel) => {
           ],
         });
       } catch (err) {
-        console.error(err);
+        console.error(`Could not send wwyd message stats for guild ${guildId}`, err);
       }
     }
   }
 
   const message = await generateQuestionMessage(i, wwyd, "wwyd_daily");
-  const sent = await channel.send(message);
 
-  setLatestWwyd(guildId, uuid, i, channel.id, sent.id);
+  try {
+    const sent = await channel.send(message);
+    setLatestWwyd(guildId, uuid, i, channel.id, sent.id);
+  } catch (err) {
+    console.error(`Could not send new wwyd for guild ${guildId} in channel ${channel.id}`, err)
+  }
 };
 
 module.exports = {
@@ -95,7 +99,7 @@ module.exports = {
         try {
           channel = await client.channels.fetch(entry.channel_id);
         } catch (err) {
-          console.error(`Could not get channel for guild ${entry.guild_id} channelid ${entry.channel_id} \n ${err}`);
+          console.error(`Could not get channel for guild ${entry.guild_id} channelid ${entry.channel_id}\n`, err);
         }
 
         if (channel && channel.isTextBased()) {

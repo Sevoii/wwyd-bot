@@ -8,13 +8,22 @@ module.exports = {
     if (!interaction.isButton()) return;
     const buttonData = interaction.customId.split(":");
     if (buttonData[0] !== "wwyd_random") return;
+    try {
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    } catch (err) {
+      console.error("Failed to defer wwyd random reply:", err);
+      return;
+    }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const message = await generateAnswerMessage(
       parseInt(buttonData[1]),
       buttonData[3],
     );
 
-    await interaction.editReply(message);
+    try {
+      await interaction.editReply(message);
+    } catch (err) {
+      console.error("Failed to generate random wwyd:", err);
+    }
   },
 };

@@ -11,7 +11,16 @@ module.exports = {
     const buttonData = interaction.customId.split(":");
     if (buttonData[0] !== "wwyd_daily") return;
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    try {
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    } catch (err) {
+      console.error(
+        `Could not defer wwyd daily reply in guild ${interaction.guildId} from ${interaction.member.id}`,
+        err,
+      );
+      return;
+    }
+
     const message = await generateAnswerMessage(
       parseInt(buttonData[1]),
       buttonData[3],
@@ -28,10 +37,17 @@ module.exports = {
     );
 
     if (res === -1) {
-      await interaction.editReply({
-        content: "Could not save score to the database, please try again",
-        flags: MessageFlags.Ephemeral,
-      });
+      try {
+        await interaction.editReply({
+          content: "Could not save score to the database, please try again",
+          flags: MessageFlags.Ephemeral,
+        });
+      } catch (err) {
+        console.error(
+          `Could not edit interaction message (db score failure) in guild ${interaction.guildId} from ${interaction.member.id}`,
+          err,
+        );
+      }
     } else {
       message.embeds.push(
         new EmbedBuilder()
@@ -43,12 +59,27 @@ module.exports = {
           .setColor(res === 1 ? "Green" : "Red"),
       );
 
-      await interaction.editReply(message);
+      try {
+        await interaction.editReply(message);
+      } catch (err) {
+        console.error(
+          `Could not edit interaction message (proper response) in guild ${interaction.guildId} from ${interaction.member.id}`,
+          err,
+        );
+        return;
+      }
 
       if (res === 1 && correct) {
-        await interaction.channel.send(
-          `<@${interaction.member.id}> answered correctly!`,
-        );
+        try {
+          await interaction.channel.send(
+            `<@${interaction.member.id}> answered correctly!`,
+          );
+        } catch (err) {
+          console.error(
+            `Could not send correct answer message in ${interaction.guildId} from ${interaction.member.id}`,
+            err,
+          );
+        }
       }
     }
   },
