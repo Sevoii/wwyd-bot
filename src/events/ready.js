@@ -1,6 +1,5 @@
 const { Events, ActivityType } = require("discord.js");
 const schedule = require("node-schedule");
-const { backupDb } = require("../wwyd/wwyd_db");
 
 module.exports = {
   name: Events.ClientReady,

@@ -50,7 +50,7 @@ module.exports = class DailyMessage {
         const data2 = await this.db.all(
           `SELECT s.discord_id AS discord_id, us.score AS score, s.correct as correct, s.answer as answer
            FROM WwydScore s
-                  JOIN USER_SCORES us
+                  JOIN UserScore us
                        ON s.discord_id = us.discord_id AND s.guild_id = us.guild_id
            WHERE s.guild_id = @guildId
              AND s.problem_id = @problemId
