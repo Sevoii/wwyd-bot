@@ -4,19 +4,13 @@ const {
   generateAnswerMessage,
   getWwydUUID,
 } = require("../wwyd/wwyd_discord");
-const {
-  getDailyChannels,
-  deleteDailyChannels,
-  setLatestWwyd,
-  getPrevStats,
-} = require("../wwyd/wwyd_db");
 const { EmbedBuilder } = require("discord.js");
 
 const sendWwydMessage = async (client, guildId, channel) => {
   const [i, wwyd] = randomWwydDaily(parseInt(guildId.substring(1, 10)));
   const uuid = getWwydUUID(i, wwyd);
 
-  const prevData = getPrevStats(guildId);
+  const prevData = await client.db.models.daily_message.getPrevStats(guildId);
   if (prevData) {
     let prevChannel;
 
@@ -34,10 +28,15 @@ const sendWwydMessage = async (client, guildId, channel) => {
             await generateAnswerMessage(prevData.internalId, null, true),
           );
         } catch (err) {
-          console.error(`Could not edit message ${prevData.messageId} for guild ${guildId}`, err);
+          console.error(
+            `Could not edit message ${prevData.messageId} for guild ${guildId}`,
+            err,
+          );
         }
       } else {
-        console.error(`Message not found ${prevData.messageId} for guild ${guildId}`);
+        console.error(
+          `Message not found ${prevData.messageId} for guild ${guildId}`,
+        );
       }
     }
 
@@ -68,7 +67,10 @@ const sendWwydMessage = async (client, guildId, channel) => {
           ],
         });
       } catch (err) {
-        console.error(`Could not send wwyd message stats for guild ${guildId}`, err);
+        console.error(
+          `Could not send wwyd message stats for guild ${guildId}`,
+          err,
+        );
       }
     }
   }
@@ -77,9 +79,18 @@ const sendWwydMessage = async (client, guildId, channel) => {
 
   try {
     const sent = await channel.send(message);
-    setLatestWwyd(guildId, uuid, i, channel.id, sent.id);
+    await client.db.models.daily_message.setLatestWwyd(
+      guildId,
+      uuid,
+      i,
+      channel.id,
+      sent.id,
+    );
   } catch (err) {
-    console.error(`Could not send new wwyd for guild ${guildId} in channel ${channel.id}`, err)
+    console.error(
+      `Could not send new wwyd for guild ${guildId} in channel ${channel.id}`,
+      err,
+    );
   }
 };
 
@@ -94,12 +105,15 @@ module.exports = {
     } else {
       const to_delete = [];
 
-      for (let entry of getDailyChannels()) {
+      for (let entry of await client.db.models.daily_toggle.getDailyChannels()) {
         let channel;
         try {
           channel = await client.channels.fetch(entry.channel_id);
         } catch (err) {
-          console.error(`Could not get channel for guild ${entry.guild_id} channelid ${entry.channel_id}\n`, err);
+          console.error(
+            `Could not get channel for guild ${entry.guild_id} channelid ${entry.channel_id}\n`,
+            err,
+          );
         }
 
         if (channel && channel.isTextBased()) {
@@ -109,7 +123,7 @@ module.exports = {
         }
       }
 
-      deleteDailyChannels(to_delete);
+      await client.db.models.daily_toggle.deleteDailyChannels(to_delete);
     }
   },
 };

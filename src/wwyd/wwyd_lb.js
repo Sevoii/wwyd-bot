@@ -1,8 +1,7 @@
 const { EmbedBuilder, MessageFlags } = require("discord.js");
-const { getLeaderboard, getScore } = require("./wwyd_db");
 
-const generateLeaderboard = (guildId) => {
-  const lb = getLeaderboard(guildId);
+const generateLeaderboard = async (db, guildId) => {
+  const lb = await db.models.daily_scores.getLeaderboard(guildId);
 
   const embed = new EmbedBuilder()
     .setTitle("WWYD Leaderboard")
@@ -20,8 +19,8 @@ const generateLeaderboard = (guildId) => {
   };
 };
 
-const generateScore = (guildId, discordId) => {
-  const score = getScore(guildId, discordId);
+const generateScore = async (db, guildId, discordId) => {
+  const score = await db.models.daily_scores.getScore(guildId, discordId);
 
   if (score != null) {
     return {

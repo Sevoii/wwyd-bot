@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const { generateQuestionMessage } = require("../wwyd/wwyd_discord");
 const { randomWwyd } = require("../wwyd/wwyd_gen");
-const { toggleDaily } = require("../wwyd/wwyd_db");
 const { generateLeaderboard, generateScore } = require("../wwyd/wwyd_lb");
 
 module.exports = {
@@ -27,7 +26,9 @@ module.exports = {
         .addSubcommand((subcommand) =>
           subcommand
             .setName("force")
-            .setDescription("Forces the bot to send a daily WWYD in the channel"),
+            .setDescription(
+              "Forces the bot to send a daily WWYD in the channel",
+            ),
         )
         .addSubcommand((subcommand) =>
           subcommand
@@ -57,14 +58,16 @@ module.exports = {
     } else if (subcommandGroup === "daily") {
       if (!interaction.inGuild()) {
         await interaction.reply({
-          content:
-            "You cannot run daily commands not in a guild.",
+          content: "You cannot run daily commands not in a guild.",
         });
         return;
       }
 
       if (subcommand === "toggle") {
-        if (!interaction.member.permissions.has("ManageChannels") && interaction.member.id !== "912708332916195368") {
+        if (
+          !interaction.member.permissions.has("ManageChannels") &&
+          interaction.member.id !== "912708332916195368"
+        ) {
           await interaction.reply({
             content:
               "You need the Manage Channels permission to use this command.",
@@ -72,7 +75,10 @@ module.exports = {
           });
           return;
         }
-        const res = toggleDaily(interaction.guildId, interaction.channelId);
+        const res = await interaction.client.db.models.daily_toggle.toggleDaily(
+          interaction.guildId,
+          interaction.channelId,
+        );
         if (res === 1) {
           await interaction.reply(
             `Successfully enabled WWYD in <#${interaction.channelId}>`,
@@ -85,7 +91,10 @@ module.exports = {
           await interaction.reply("Internal Error, please try again");
         }
       } else if (subcommand === "force") {
-        if (!interaction.member.permissions.has("ManageChannels") && interaction.member.id !== "912708332916195368") {
+        if (
+          !interaction.member.permissions.has("ManageChannels") &&
+          interaction.member.id !== "912708332916195368"
+        ) {
           await interaction.reply({
             content:
               "You need the Manage Channels permission to use this command.",
@@ -93,13 +102,23 @@ module.exports = {
           });
           return;
         }
-        await interaction.reply("OK")
-        interaction.client.emit("WWYD_Daily", interaction.client, interaction.channel);
+        await interaction.reply("OK");
+        interaction.client.emit(
+          "WWYD_Daily",
+          interaction.client,
+          interaction.channel,
+        );
       } else if (subcommand === "leaderboard") {
-        await interaction.reply(generateLeaderboard(interaction.guildId));
+        await interaction.reply(
+          await generateLeaderboard(interaction.client.db, interaction.guildId),
+        );
       } else if (subcommand === "score") {
         await interaction.reply(
-          generateScore(interaction.guildId, interaction.member.id),
+          await generateScore(
+            interaction.client.db,
+            interaction.guildId,
+            interaction.member.id,
+          ),
         );
       }
     }

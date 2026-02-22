@@ -2,14 +2,26 @@ require("dotenv").config({ path: "./.env" });
 const { Client, GatewayIntentBits } = require("discord.js");
 const { loadCommands } = require("./commands/load_commands");
 const { loadEvents } = require("./events/load_events");
+const Database = require("./db");
 
 process.on("unhandledRejection", (error) => {
   console.error("Unhandled promise rejection:", error);
 });
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+(async () => {
+  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  const db = new Database({
+    connection_type: "local_sqlite3",
+    run_migrations: true,
+    file: "wwyd.db",
+  });
 
-client.commands = loadCommands();
-loadEvents(client);
+  await db.initialize();
 
-client.login(process.env.DISCORD_BOT_TOKEN).catch(console.error);
+  client.commands = loadCommands();
+  client.db = db;
+
+  loadEvents(client);
+
+  client.login(process.env.DISCORD_BOT_TOKEN).catch(console.error);
+})();

@@ -1,7 +1,6 @@
 const { Events, MessageFlags, EmbedBuilder } = require("discord.js");
 const { generateAnswerMessage } = require("../wwyd/wwyd_discord");
 const { getWwyd } = require("../wwyd/wwyd_gen");
-const { addScore } = require("../wwyd/wwyd_db");
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -27,7 +26,7 @@ module.exports = {
     );
 
     const correct = buttonData[3] === getWwyd(parseInt(buttonData[1])).answer;
-    const res = addScore(
+    const res = await interaction.client.db.models.daily_answers.addAnswer(
       interaction.guildId,
       interaction.member.id,
       buttonData[2],
