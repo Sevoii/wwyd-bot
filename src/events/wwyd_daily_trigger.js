@@ -21,7 +21,12 @@ const sendWwydMessage = async (client, guildId, channel) => {
     }
 
     if (prevChannel?.isTextBased()) {
-      const message = await prevChannel.messages.fetch(prevData.messageId);
+      let message;
+      try {
+        message = await prevChannel.messages.fetch(prevData.messageId);
+      } catch (err) {
+        console.error(`Could not read prev channel wwyd force, skipping`, err);
+      }
       if (message) {
         try {
           await message.edit(
