@@ -41,7 +41,7 @@ const generateScore = async (db, guildId, discordId) => {
             { name: "Score", value: `\`${score.score}\` Points`, inline: true },
             {
               name: "Attempts",
-              value: `\`${score.correct}\``,
+              value: `\`${score.attempts}\``,
               inline: true,
             },
             {
