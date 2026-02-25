@@ -5,7 +5,7 @@ module.exports = {
                                         FROM WwydScore ws
                                         WHERE ws.guild_id = UserScore.guild_id
                                           AND ws.discord_id = UserScore.discord_id
-                                          AND ws.problem_id > (SELECT MAX(wss.problem_id)
+                                          AND ws.problem_id > (SELECT COALESCE(MAX(wss.problem_id), "")
                                                                FROM WwydScore wss
                                                                WHERE wss.correct = 0
                                                                  AND wss.guild_id = UserScore.guild_id
