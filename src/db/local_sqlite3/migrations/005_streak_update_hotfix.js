@@ -12,6 +12,6 @@ module.exports = {
                                                                  AND wss.discord_id = UserScore.discord_id));
     `);
 
-    await connection.run('UPDATE UserScore SET best_streak = streak')
+    await connection.run("UPDATE UserScore SET best_streak = streak");
   },
 };
