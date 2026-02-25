@@ -3,16 +3,26 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 const generateLeaderboard = async (db, guildId) => {
   const lb = await db.models.daily_scores.getLeaderboard(guildId);
 
-  const embed = new EmbedBuilder()
-    .setTitle("WWYD Leaderboard")
-    .setDescription(
-      lb
-        .map(
-          (x, i) =>
-            `${i + 1}. <@${x.discord_id}> — ${x.score} pts • ${x.attempts} attempts • ${Math.round((x.correct / x.attempts) * 100)}%`,
-        )
-        .join("\n") + "\n",
-    );
+  const embed = new EmbedBuilder().setTitle("WWYD Leaderboard").setDescription(
+    lb
+      .map((x, i) => {
+        let base = `${i + 1}. <@${x.discord_id}> — `;
+
+        let parts = [];
+
+        parts.push(`${x.score} pts`);
+
+        if (x.streak >= 3) {
+          parts[0] += ` (${x.streak} ${x.streak > 10 ? "🚀" : "🔥"})`;
+        }
+
+        parts.push(`${x.attempts} attempts`);
+        parts.push(`${Math.round((x.correct / x.attempts) * 100)}%`);
+
+        return base + parts.join(" • ");
+      })
+      .join("\n") + "\n",
+  );
 
   return {
     embeds: [embed],
@@ -27,7 +37,25 @@ const generateScore = async (db, guildId, discordId) => {
       embeds: [
         new EmbedBuilder()
           .setTitle("WWYD Daily Score")
-          .setDescription(`<@${discordId}>'s Score: ${score}`)
+          .addFields(
+            { name: "Score", value: `\`${score.score}\` Points`, inline: true },
+            {
+              name: "Attempts",
+              value: `\`${score.correct}\``,
+              inline: true,
+            },
+            {
+              name: "Streak",
+              value: `\`${score.streak}\` ${score.streak > 10 ? "🚀" : score.streak > 3 ? "🔥" : ""}`,
+              inline: true,
+            },
+            {
+              name: "Best Streak",
+              value: `\`${score.best_streak}\``,
+              inline: true,
+            },
+          )
+          // .setDescription(`<@${discordId}>'s Score: ${score.score}`)
           .setColor("Green"),
       ],
     };

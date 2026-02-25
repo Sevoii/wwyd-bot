@@ -9,7 +9,7 @@ module.exports = class DailyScores {
         `SELECT *
          FROM UserScore
          WHERE guild_id = @guildId
-         ORDER BY score desc
+         ORDER BY score desc, attempts, streak desc
          LIMIT 10`,
         { guildId },
       );
@@ -21,13 +21,14 @@ module.exports = class DailyScores {
   async getScore(guildId, discordId) {
     try {
       return (
-        (await this.db.get(
-          `SELECT score
+        await this.db.get(
+          `SELECT *
            FROM UserScore
            WHERE guild_id = @guildId
-             AND discord_id = @discordId`,
+             AND discord_id = @discordId
+           LIMIT 1;`,
           { guildId, discordId },
-        )?.score) ?? 0
+        )
       );
     } catch (err) {
       console.error(err);

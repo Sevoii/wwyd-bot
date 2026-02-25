@@ -70,9 +70,18 @@ module.exports = {
 
       if (res === 1 && correct) {
         try {
-          await interaction.channel.send(
-            `<@${interaction.member.id}> answered correctly!`,
+          let score = await interaction.client.db.models.daily_scores.getScore(
+            interaction.guildId,
+            interaction.member.id,
           );
+
+          let msg = `<@${interaction.member.id}> got it right!`;
+
+          if (score && score.streak >= 3) {
+            msg += `\n-# Answer Streak: ${score.streak} ${score.streak > 10 ? "🚀" : "🔥"}`;
+          }
+
+          await interaction.channel.send(msg);
         } catch (err) {
           console.error(
             `Could not send correct answer message in ${interaction.guildId} from ${interaction.member.id}`,

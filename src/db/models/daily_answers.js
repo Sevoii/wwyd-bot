@@ -36,16 +36,20 @@ module.exports = class DailyAnswers {
 
         if (!isPass) {
           await this.db.run(
-            `INSERT INTO UserScore (guild_id, discord_id, score, correct, attempts)
+            `INSERT INTO UserScore (guild_id, discord_id, score, correct, attempts, streak, best_streak)
              VALUES (@guildId,
                      @discordId,
                      @score,
                      CASE WHEN @score > 0 THEN 1 ELSE 0 END,
-                     1)
+                     1,
+                     CASE WHEN @score > 0 THEN 1 ELSE 0 END,
+                     CASE WHEN @score > 0 THEN 1 ELSE 0 END)
              ON CONFLICT(guild_id, discord_id)
                DO UPDATE SET score    = score + @score,
                              correct  = correct + (CASE WHEN @score > 0 THEN 1 ELSE 0 END),
-                             attempts = attempts + 1;
+                             attempts = attempts + 1,
+                             streak   = CASE WHEN @score > 0 THEN streak + 1 ELSE 0 END,
+                             best_streak = MAX(CASE WHEN @score > 0 THEN streak + 1 ELSE 0 END, best_streak);
             `,
             {
               guildId,
