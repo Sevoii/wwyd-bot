@@ -19,7 +19,25 @@ class Database {
 
   async initialize() {
     await this.connect();
+
+    if (this.config.run_migrations) {
+      await this.migrate();
+    }
+
     await this.loadModels();
+  }
+
+  async migrate() {
+    if (databases[this.config.connection_type].Connection) {
+      const migrator = new databases[this.config.connection_type].Migration(
+        this.connection,
+      );
+      await migrator.migrate();
+    } else {
+      throw Error(
+        `Database connection type ${this.config.connection_type} has no migrations specified`,
+      );
+    }
   }
 
   async loadModels() {
@@ -60,23 +78,6 @@ class Database {
       this.config,
     );
 
-    this.models = {
-      daily_toggle: new (require("./models/daily_toggle"))(this),
-    };
-
-    if (this.config.run_migrations) {
-      if (databases[this.config.connection_type].Connection) {
-        const migrator = new databases[this.config.connection_type].Migration(
-          this.connection,
-        );
-        await migrator.migrate();
-      } else {
-        throw Error(
-          `Database connection type ${this.config.connection_type} has no migrations specified`,
-        );
-      }
-    }
-
     return this;
   }
 
@@ -93,7 +94,7 @@ class Database {
 
   backup(backup_dir = null) {
     if ("backup" in this.connection) {
-      this.connection.backup(backup_dir).catch(console.error)
+      this.connection.backup(backup_dir).catch(console.error);
     }
   }
 }
