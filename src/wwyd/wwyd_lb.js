@@ -38,7 +38,7 @@ const generateScore = async (db, guildId, discordId) => {
         new EmbedBuilder()
           .setTitle("WWYD Daily Score")
           .addFields(
-            { name: "Score", value: `\`${score.score}\` Points`, inline: true },
+            { name: "Score", value: `\`${score.score}\``, inline: true },
             {
               name: "Attempts",
               value: `\`${score.attempts}\``,
