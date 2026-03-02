@@ -12,8 +12,8 @@ const generateLeaderboard = async (db, guildId) => {
 
         parts.push(`${x.score} pts`);
 
-        if (x.streak >= 3) {
-          parts[0] += ` (${x.streak} ${x.streak > 10 ? "🚀" : "🔥"})`;
+        if (x.streak >= 5) {
+          parts[0] += ` (${x.streak} ${x.streak >= 10 ? "🚀" : "🔥"})`;
         }
 
         parts.push(`${x.attempts} attempts`);
@@ -46,7 +46,7 @@ const generateScore = async (db, guildId, discordId) => {
             },
             {
               name: "Streak",
-              value: `\`${score.streak}\` ${score.streak > 10 ? "🚀" : score.streak > 3 ? "🔥" : ""}`,
+              value: `\`${score.streak}\` ${score.streak >= 10 ? "🚀" : score.streak >= 5 ? "🔥" : ""}`,
               inline: true,
             },
             {
