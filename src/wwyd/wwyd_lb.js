@@ -1,7 +1,16 @@
 const { EmbedBuilder, MessageFlags } = require("discord.js");
 
-const generateLeaderboard = async (db, guildId) => {
-  const lb = await db.models.daily_scores.getLeaderboard(guildId, 1);
+const generateLeaderboard = async (db, guildId, season) => {
+  if (season == null) {
+    season = await db.models.daily_toggle.getLatestSeason(guildId);
+    if (season === -1) {
+      return {
+        content: "Failed to find latest season",
+      };
+    }
+  }
+
+  const lb = await db.models.daily_scores.getLeaderboard(guildId, season);
 
   const embed = new EmbedBuilder().setTitle("WWYD Leaderboard").setDescription(
     lb
@@ -29,8 +38,21 @@ const generateLeaderboard = async (db, guildId) => {
   };
 };
 
-const generateScore = async (db, guildId, discordId) => {
-  const score = await db.models.daily_scores.getScore(guildId, discordId, 1);
+const generateScore = async (db, guildId, discordId, season) => {
+  if (season == null) {
+    season = await db.models.daily_toggle.getLatestSeason(guildId);
+    if (season === -1) {
+      return {
+        content: "Failed to find latest season",
+      };
+    }
+  }
+
+  const score = await db.models.daily_scores.getScore(
+    guildId,
+    discordId,
+    season,
+  );
 
   if (score != null) {
     return {
