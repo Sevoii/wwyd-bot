@@ -12,26 +12,29 @@ const generateLeaderboard = async (db, guildId, season) => {
 
   const lb = await db.models.daily_scores.getLeaderboard(guildId, season);
 
-  const embed = new EmbedBuilder().setTitle("WWYD Leaderboard").setDescription(
-    lb
-      .map((x, i) => {
-        let base = `${i + 1}. <@${x.discord_id}> — `;
+  const embed = new EmbedBuilder()
+    .setTitle("WWYD Leaderboard")
+    .setDescription(
+      lb
+        .map((x, i) => {
+          let base = `${i + 1}. <@${x.discord_id}> — `;
 
-        let parts = [];
+          let parts = [];
 
-        parts.push(`${x.score} pts`);
+          parts.push(`${x.score} pts`);
 
-        if (x.streak >= 5) {
-          parts[0] += ` (${x.streak} ${x.streak >= 10 ? "🚀" : "🔥"})`;
-        }
+          if (x.streak >= 5) {
+            parts[0] += ` (${x.streak} ${x.streak >= 10 ? "🚀" : "🔥"})`;
+          }
 
-        parts.push(`${x.attempts} attempts`);
-        parts.push(`${Math.round((x.score / x.attempts) * 100)}%`);
+          parts.push(`${x.attempts} attempts`);
+          parts.push(`${Math.round((x.score / x.attempts) * 100)}%`);
 
-        return base + parts.join(" • ");
-      })
-      .join("\n") + "\n",
-  );
+          return base + parts.join(" • ");
+        })
+        .join("\n") + "\n",
+    )
+    .setFooter({ text: `Season: ${season}` });
 
   return {
     embeds: [embed],
@@ -78,7 +81,8 @@ const generateScore = async (db, guildId, discordId, season) => {
             },
           )
           // .setDescription(`<@${discordId}>'s Score: ${score.score}`)
-          .setColor("Green"),
+          .setColor("Green")
+          .setFooter({ text: `Season: ${season}` }),
       ],
     };
   } else {
