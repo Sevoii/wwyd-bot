@@ -13,8 +13,8 @@ Massive thanks to the folks at UW Riichi Club for inspiring this project.
 
 Daily Wwyd:
 
-* `/wwyd leaderboard`: Guild leaderboard
-* `/wwyd score`: Guild score
+* `/wwyd leaderboard`: Guild leaderboard. Optional parameter `season` to select which season to use
+* `/wwyd score`: Guild score. Optional parameter `season` to select which season to use
 
 Wwyd Config (Requires Manage-Channels Permission to use)
 
