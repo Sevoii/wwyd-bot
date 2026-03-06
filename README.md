@@ -18,9 +18,9 @@ Daily Wwyd:
 
 Wwyd Config (Requires Manage-Channels Permission to use)
 
-* `/wwyd_config toggle`: Toggles wwyd daily for the channel (Users will require Manage-Channels Permission)
-* `/wwyd_config force`: Forces the bot to send a daily WWYD in the channel (Users will require Manage-Channels
-  Permission)
+* `/wwyd_config toggle`: Toggles wwyd daily for the channel
+* `/wwyd_config force`: Forces the bot to send a daily WWYD in the channel
+* `/wwyd_config new_season`: Creates a new season for the server. The next wwyd sent will 
 
 Random Commands:
 
