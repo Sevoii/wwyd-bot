@@ -124,7 +124,7 @@ module.exports = {
           );
         }
 
-        if (channel && channel.isTextBased()) {
+        if (channel?.isTextBased()) {
           await sendWwydMessage(client, entry.guild_id, channel);
         } else {
           to_delete.push(channel);

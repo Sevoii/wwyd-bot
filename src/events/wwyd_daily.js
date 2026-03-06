@@ -20,19 +20,15 @@ module.exports = {
       return;
     }
 
-    const message = await generateAnswerMessage(
-      parseInt(buttonData[1]),
-      buttonData[3],
-    );
-
     const correct = buttonData[3] === getWwyd(parseInt(buttonData[1])).answer;
+    const isPass = buttonData[3] === "na";
     const res = await interaction.client.db.models.daily_answers.addAnswer(
       interaction.guildId,
       interaction.member.id,
       buttonData[2],
       buttonData[3],
       correct ? 1 : 0,
-      buttonData[3] === "na",
+      isPass,
     );
 
     if (res === -1) {
@@ -47,7 +43,16 @@ module.exports = {
           err,
         );
       }
-    } else {
+
+      return;
+    }
+
+    const message = await generateAnswerMessage(
+      parseInt(buttonData[1]),
+      buttonData[3],
+    );
+
+    if (!isPass) {
       message.embeds.push(
         new EmbedBuilder()
           .setTitle(
@@ -57,37 +62,37 @@ module.exports = {
           )
           .setColor(res === 1 ? "Green" : "Red"),
       );
+    }
 
+    try {
+      await interaction.editReply(message);
+    } catch (err) {
+      console.error(
+        `Could not edit interaction message (proper response) in guild ${interaction.guildId} from ${interaction.member.id}`,
+        err,
+      );
+      return;
+    }
+
+    if (res === 1 && correct) {
       try {
-        await interaction.editReply(message);
+        let score = await interaction.client.db.models.daily_scores.getScore(
+          interaction.guildId,
+          interaction.member.id,
+        );
+
+        let msg = `<@${interaction.member.id}> got it right!`;
+
+        if (score && score.streak >= 3) {
+          msg += `\n-# Answer Streak: ${score.streak} ${score.streak > 10 ? "🚀" : "🔥"}`;
+        }
+
+        await interaction.channel.send(msg);
       } catch (err) {
         console.error(
-          `Could not edit interaction message (proper response) in guild ${interaction.guildId} from ${interaction.member.id}`,
+          `Could not send correct answer message in ${interaction.guildId} from ${interaction.member.id}`,
           err,
         );
-        return;
-      }
-
-      if (res === 1 && correct) {
-        try {
-          let score = await interaction.client.db.models.daily_scores.getScore(
-            interaction.guildId,
-            interaction.member.id,
-          );
-
-          let msg = `<@${interaction.member.id}> got it right!`;
-
-          if (score && score.streak >= 3) {
-            msg += `\n-# Answer Streak: ${score.streak} ${score.streak > 10 ? "🚀" : "🔥"}`;
-          }
-
-          await interaction.channel.send(msg);
-        } catch (err) {
-          console.error(
-            `Could not send correct answer message in ${interaction.guildId} from ${interaction.member.id}`,
-            err,
-          );
-        }
       }
     }
   },
