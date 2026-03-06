@@ -19,6 +19,9 @@ module.exports = {
         .setName("force")
         .setDescription("Forces the bot to send a daily WWYD in the channel"),
     )
+    .addSubcommand((subcommand) =>
+      subcommand.setName("new_season").setDescription("Creates a new season"),
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .setContexts(InteractionContextType.Guild),
   async execute(interaction) {
@@ -55,6 +58,16 @@ module.exports = {
         interaction.client,
         interaction.channel,
       );
+    } else if (subcommand === "new_season") {
+      let res = await interaction.client.db.models.daily_toggle.stageNewSeason(
+        interaction.guildId,
+      );
+
+      if (res === 1) {
+        await interaction.reply("OK");
+      } else {
+        await interaction.reply("Failed to set new season, try again");
+      }
     }
   },
 };

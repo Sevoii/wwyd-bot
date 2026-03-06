@@ -108,7 +108,7 @@ module.exports = class DailyToggle {
       await this.db.run(
         `
         INSERT INTO Season (guild_id, season)
-        VALUES (@guidId, @season)
+        VALUES (@guildId, @season)
         ON CONFLICT (guild_id, season) DO NOTHING;
       `,
         { guildId, season: season + 1 },

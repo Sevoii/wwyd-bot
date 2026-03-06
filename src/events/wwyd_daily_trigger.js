@@ -108,6 +108,9 @@ module.exports = {
     if (channel) {
       await sendWwydMessage(client, channel.guild.id, channel);
     } else {
+      // A new day! Updates the seasons for all servers
+      await client.db.models.daily_toggle.commitNewSeasons();
+
       const to_delete = [];
 
       for (let entry of await client.db.models.daily_toggle.getDailyChannels()) {
