@@ -76,9 +76,14 @@ module.exports = {
 
     if (res === 1 && correct) {
       try {
+        let season =
+          await interaction.client.db.models.daily_toggle.getLatestSeason(
+            interaction.guildId,
+          );
         let score = await interaction.client.db.models.daily_scores.getScore(
           interaction.guildId,
           interaction.member.id,
+          season,
         );
 
         let msg = `<@${interaction.member.id}> got it right!`;
