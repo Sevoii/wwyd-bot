@@ -10,10 +10,11 @@ module.exports = class DailyAnswers {
       if (
         await this.db.get(
           `SELECT *
-                   FROM WwydScore
-                   WHERE guild_id = @guildId
-                     AND discord_id = @discordId
-                     AND problem_id = @problemId`,
+           FROM WwydScore
+           WHERE guild_id = @guildId
+             AND discord_id = @discordId
+             AND problem_id = @problemId
+           LIMIT 1;`,
           { guildId, discordId, problemId },
         )
       ) {
@@ -35,26 +36,47 @@ module.exports = class DailyAnswers {
         );
 
         if (!isPass) {
+          let season = (
+            await this.db.get(
+              `
+              SELECT COALESCE(MAX(season), 1) AS current_season
+              FROM Season
+              WHERE guild_id = @guildId
+                AND is_active = 1;`,
+              { guildId },
+            )
+          ).current_season;
+
           await this.db.run(
-            `INSERT INTO UserScore (guild_id, discord_id, score, correct, attempts, streak, best_streak)
+            `INSERT INTO UserScore (guild_id, discord_id, streak, best_streak)
              VALUES (@guildId,
                      @discordId,
-                     @score,
-                     CASE WHEN @score > 0 THEN 1 ELSE 0 END,
-                     1,
                      CASE WHEN @score > 0 THEN 1 ELSE 0 END,
                      CASE WHEN @score > 0 THEN 1 ELSE 0 END)
              ON CONFLICT(guild_id, discord_id)
-               DO UPDATE SET score    = score + @score,
-                             correct  = correct + (CASE WHEN @score > 0 THEN 1 ELSE 0 END),
-                             attempts = attempts + 1,
-                             streak   = CASE WHEN @score > 0 THEN streak + 1 ELSE 0 END,
+               DO UPDATE SET streak      = CASE WHEN @score > 0 THEN streak + 1 ELSE 0 END,
                              best_streak = MAX(CASE WHEN @score > 0 THEN streak + 1 ELSE 0 END, best_streak);
             `,
             {
               guildId,
               discordId,
               score,
+            },
+          );
+
+          await this.db.run(
+            `
+              INSERT INTO SeasonScores (guild_id, discord_id, score, attempts, season)
+              VALUES (@guildId, @discordId, @score, 1, @season)
+              ON CONFLICT (guild_id, discord_id, season)
+                DO UPDATE SET score    = score + @score,
+                              attempts = attempts + 1;
+            `,
+            {
+              guildId,
+              discordId,
+              score,
+              season,
             },
           );
         }
@@ -69,5 +91,4 @@ module.exports = class DailyAnswers {
       return -1;
     }
   }
-}
-
+};

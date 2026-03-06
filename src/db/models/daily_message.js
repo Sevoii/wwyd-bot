@@ -48,14 +48,17 @@ module.exports = class DailyMessage {
         });
 
         const data2 = await this.db.all(
-          `SELECT s.discord_id AS discord_id, us.score AS score, s.correct as correct, s.answer as answer
+          `SELECT s.discord_id AS discord_id, ss.score AS score, s.correct as correct, s.answer as answer
            FROM WwydScore s
                   JOIN UserScore us
                        ON s.discord_id = us.discord_id AND s.guild_id = us.guild_id
+                  LEFT JOIN SeasonScores ss
+                            ON us.discord_id = ss.discord_id
+                              AND us.guild_id = ss.guild_id
            WHERE s.guild_id = @guildId
              AND s.problem_id = @problemId
              AND answer != 'na'
-           ORDER BY s.correct DESC, us.score DESC
+           ORDER BY s.correct DESC, ss.score DESC
           `, {
           guildId,
           problemId: data.problem_id,

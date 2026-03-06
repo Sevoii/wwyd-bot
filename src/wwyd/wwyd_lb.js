@@ -1,7 +1,7 @@
 const { EmbedBuilder, MessageFlags } = require("discord.js");
 
 const generateLeaderboard = async (db, guildId) => {
-  const lb = await db.models.daily_scores.getLeaderboard(guildId);
+  const lb = await db.models.daily_scores.getLeaderboard(guildId, 1);
 
   const embed = new EmbedBuilder().setTitle("WWYD Leaderboard").setDescription(
     lb
@@ -17,7 +17,7 @@ const generateLeaderboard = async (db, guildId) => {
         }
 
         parts.push(`${x.attempts} attempts`);
-        parts.push(`${Math.round((x.correct / x.attempts) * 100)}%`);
+        parts.push(`${Math.round((x.score / x.attempts) * 100)}%`);
 
         return base + parts.join(" • ");
       })
@@ -30,7 +30,7 @@ const generateLeaderboard = async (db, guildId) => {
 };
 
 const generateScore = async (db, guildId, discordId) => {
-  const score = await db.models.daily_scores.getScore(guildId, discordId);
+  const score = await db.models.daily_scores.getScore(guildId, discordId, 1);
 
   if (score != null) {
     return {
