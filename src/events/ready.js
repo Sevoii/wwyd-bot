@@ -11,9 +11,9 @@ module.exports = {
     });
 
     const rule = new schedule.RecurrenceRule();
-    rule.hour = 15;
+    rule.hour = 10;
     rule.minute = 0;
-    // rule.tz = "Etc/UTC";
+    rule.tz = "America/New_York";
 
     schedule.scheduleJob(rule, () => {
       client.emit("WWYD_Daily", client);
