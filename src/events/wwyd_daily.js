@@ -20,16 +20,23 @@ module.exports = {
       return;
     }
 
-    const correct = buttonData[3] === getWwyd(parseInt(buttonData[1])).answer;
+    const wwydId = parseInt(buttonData[1]);
+    const correct = buttonData[3] === getWwyd(wwydId).answer;
     const isPass = buttonData[3] === "na";
-    const res = await interaction.client.db.models.daily_answers.addAnswer(
-      interaction.guildId,
-      interaction.member.id,
-      buttonData[2],
-      buttonData[3],
-      correct ? 1 : 0,
-      isPass,
-    );
+    let res;
+
+    if (wwydId >= 0) {
+      res = await interaction.client.db.models.daily_answers.addAnswer(
+        interaction.guildId,
+        interaction.member.id,
+        buttonData[2],
+        buttonData[3],
+        correct ? 1 : 0,
+        isPass,
+      );
+    } else {
+      res = 1;
+    }
 
     if (res === -1) {
       try {
@@ -52,7 +59,7 @@ module.exports = {
       buttonData[3],
     );
 
-    if (!isPass) {
+    if (!isPass && wwydId >= 0) {
       message.embeds.push(
         new EmbedBuilder()
           .setTitle(
@@ -87,6 +94,10 @@ module.exports = {
         );
 
         let msg = `<@${interaction.member.id}> got it right!`;
+
+        if (wwydId < 0 && correct) {
+          score.streak = 999/qw;
+        }
 
         if (score && score.streak >= 3) {
           msg += `\n-# Answer Streak: ${score.streak} ${score.streak > 10 ? "🚀" : "🔥"}`;

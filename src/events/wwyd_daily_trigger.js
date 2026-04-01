@@ -1,4 +1,4 @@
-const { randomWwydDaily } = require("../wwyd/wwyd_gen");
+const { funnyWwydDaily, randomWwydDaily } = require("../wwyd/wwyd_gen");
 const {
   generateQuestionMessage,
   generateAnswerMessage,
@@ -7,11 +7,11 @@ const {
 const { EmbedBuilder } = require("discord.js");
 
 const sendWwydMessage = async (client, guildId, channel) => {
-  const [i, wwyd] = randomWwydDaily(parseInt(guildId.substring(1, 10)));
+  const [i, wwyd] = funnyWwydDaily(parseInt(guildId.substring(1, 10)));
   const uuid = getWwydUUID(i, wwyd);
 
   const prevData = await client.db.models.daily_message.getPrevStats(guildId);
-  if (prevData) {
+  if (prevData && i >= 0) {
     let prevChannel;
 
     try {
@@ -84,13 +84,15 @@ const sendWwydMessage = async (client, guildId, channel) => {
 
   try {
     const sent = await channel.send(message);
-    await client.db.models.daily_message.setLatestWwyd(
-      guildId,
-      uuid,
-      i,
-      channel.id,
-      sent.id,
-    );
+    if (i >= 0) {
+      await client.db.models.daily_message.setLatestWwyd(
+        guildId,
+        uuid,
+        i,
+        channel.id,
+        sent.id,
+      );
+    }
   } catch (err) {
     console.error(
       `Could not send new wwyd for guild ${guildId} in channel ${channel.id}`,
