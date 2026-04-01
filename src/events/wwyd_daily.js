@@ -87,16 +87,16 @@ module.exports = {
           await interaction.client.db.models.daily_toggle.getLatestSeason(
             interaction.guildId,
           );
-        let score = await interaction.client.db.models.daily_scores.getScore(
+        let score = (await interaction.client.db.models.daily_scores.getScore(
           interaction.guildId,
           interaction.member.id,
           season,
-        );
+        )) ?? { streak: 0 };
 
         let msg = `<@${interaction.member.id}> got it right!`;
 
         if (wwydId < 0 && correct) {
-          score.streak = 999/qw;
+          score.streak = 999;
         }
 
         if (score && score.streak >= 3) {
