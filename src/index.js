@@ -14,9 +14,10 @@ if (process.platform === "linux") {
   console.log("Detected platform as linux, trying to install fonts");
 
   const fontSrc = path.resolve("assets/fonts/JetBrainsMono-ExtraBold.ttf");
-  const fontDir = path.join(os.homedir(), ".local/share/fonts");
+  const fontDir = path.join(os.homedir(), ".fonts");
   const fontDest = path.join(fontDir, "JetBrainsMono-ExtraBold.ttf");
 
+  console.log("Checking to see if font exists", fontDest);
   if (!fs.existsSync(fontDest)) {
     console.log("Installing fonts");
     fs.mkdirSync(fontDir, { recursive: true });
