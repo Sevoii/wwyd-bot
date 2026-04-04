@@ -9,6 +9,11 @@ const {
 const sharp = require("sharp");
 const path = require("node:path");
 
+const fs = require("fs");
+const jetbrainsMono = fs
+  .readFileSync("assets/fonts/JetBrainsMono-ExtraBold.ttf")
+  .toString("base64");
+
 const SEAT_MAPPINGS = {
   E: "\u6771",
   S: "\u5357",
@@ -25,7 +30,7 @@ const formatTile = (tile) => {
 };
 
 const generateHeader = ({ seat, round, turn }) =>
-  `Round:${SEAT_MAPPINGS[round]} Seat:${SEAT_MAPPINGS[seat]} Turn:${turn}`;
+  `Round:\u2009${SEAT_MAPPINGS[round]}\u2002Seat:\u2009${SEAT_MAPPINGS[seat]}\u2002Turn:\u2009${turn}`;
 
 const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const HEADER_HEIGHT = 75;
@@ -48,15 +53,29 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
     height: TILE_HEIGHT,
   }));
 
+  const header = generateHeader({ seat, round, turn });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="60">
+  <defs>
+    <style>
+      @font-face {
+        font-family: "JetBrainsMono-ExtraBold";
+        src: url("data:font/truetype;base64,${jetbrainsMono}");
+      }
+    </style>
+  </defs>
+  <text x="0" y="32"
+    font-family="JetBrainsMono-ExtraBold"
+    font-weight="800"
+    font-size="33"
+    fill="white"
+    stroke="black"
+    stroke-width="2"
+    paint-order="stroke"
+  >${header}</text>
+</svg>`;
+
   composite.push({
-    input: {
-      text: {
-        text: `<span foreground="white"><b>${generateHeader({ seat, round, turn })}</b></span>`,
-        dpi: 200,
-        rgba: true,
-        font: "monospace",
-      },
-    },
+    input: Buffer.from(svg),
     left: 20,
     top: 20,
   });
