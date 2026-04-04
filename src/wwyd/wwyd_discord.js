@@ -7,7 +7,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const sharp = require("sharp");
-const path = require("node:path");
+const path = require("path");
 
 const SEAT_MAPPINGS = {
   E: "\u6771",
@@ -25,7 +25,7 @@ const formatTile = (tile) => {
 };
 
 const generateHeader = ({ seat, round, turn }) =>
-  `Round:${SEAT_MAPPINGS[round]} Seat:${SEAT_MAPPINGS[seat]} Turn:${turn}`;
+  `Round:${SEAT_MAPPINGS[round]}\u2002Seat:${SEAT_MAPPINGS[seat]}\u2002Turn:${turn}`;
 
 const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const HEADER_HEIGHT = 75;
@@ -48,15 +48,21 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
     height: TILE_HEIGHT,
   }));
 
+  const header = generateHeader({ seat, round, turn });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="60">
+  <text x="0" y="32"
+    font-family="monospace"
+    font-weight="800"
+    font-size="33"
+    fill="white"
+    stroke="black"
+    stroke-width="2"
+    paint-order="stroke"
+  >${header}</text>
+</svg>`;
+
   composite.push({
-    input: {
-      text: {
-        text: `<span foreground="white"><b>${generateHeader({ seat, round, turn })}</b></span>`,
-        dpi: 200,
-        rgba: true,
-        font: "monospace",
-      },
-    },
+    input: Buffer.from(svg),
     left: 20,
     top: 20,
   });
