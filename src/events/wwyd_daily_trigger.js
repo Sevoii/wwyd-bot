@@ -6,8 +6,10 @@ const {
 } = require("../wwyd/wwyd_discord");
 const { EmbedBuilder } = require("discord.js");
 
-const sendWwydMessage = async (client, guildId, channel) => {
-  const [i, wwyd] = funnyWwydDaily(parseInt(guildId.substring(1, 10)));
+const sendWwydMessage = async (client, guildId, channel, funny = false) => {
+  const [i, wwyd] = funny
+    ? funnyWwydDaily(parseInt(guildId.substring(1, 10)))
+    : randomWwydDaily(parseInt(guildId.substring(1, 10)));
   const uuid = getWwydUUID(i, wwyd);
 
   const prevData = await client.db.models.daily_message.getPrevStats(guildId);
@@ -93,11 +95,15 @@ const sendWwydMessage = async (client, guildId, channel) => {
         sent.id,
       );
     }
+
+    return true;
   } catch (err) {
     console.error(
       `Could not send new wwyd for guild ${guildId} in channel ${channel.id}`,
       err,
     );
+
+    return false;
   }
 };
 
@@ -107,8 +113,11 @@ module.exports = {
   async execute(client, channel) {
     console.log("Daily WWYD Sent Out");
 
+    const date = new Date();
+    const isAprilFirst = date.getMonth() === 3 && date.getDay() === 1;
+
     if (channel) {
-      await sendWwydMessage(client, channel.guild.id, channel);
+      await sendWwydMessage(client, channel.guild.id, channel, isAprilFirst);
     } else {
       // A new day! Updates the seasons for all servers
       await client.db.models.daily_toggle.commitNewSeasons();
@@ -126,9 +135,15 @@ module.exports = {
           );
         }
 
-        if (channel?.isTextBased()) {
-          await sendWwydMessage(client, entry.guild_id, channel);
-        } else {
+        if (
+          channel?.isTextBased() &&
+          !(await sendWwydMessage(
+            client,
+            entry.guild_id,
+            channel,
+            isAprilFirst,
+          ))
+        ) {
           to_delete.push(channel);
         }
       }

@@ -23,7 +23,7 @@ const funnyWwyd = {
   ],
   draw: "4z",
   answer: "6z",
-  comment: ["DREAM FOR THE TSUUIISOU ☄☄☄☄☄☄☄"],
+  comment: ["DREAM FOR THE BIG SEVEN STARS ☄☄☄☄☄☄☄"],
 };
 
 const randomWwyd = () => {

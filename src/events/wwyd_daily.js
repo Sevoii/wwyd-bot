@@ -10,6 +10,9 @@ module.exports = {
     const buttonData = interaction.customId.split(":");
     if (buttonData[0] !== "wwyd_daily") return;
 
+    const date = new Date();
+    const isAprilFirst = date.getMonth() === 3 && date.getDay() === 1;
+
     try {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     } catch (err) {
@@ -59,16 +62,20 @@ module.exports = {
       buttonData[3],
     );
 
-    if (!isPass && wwydId >= 0) {
-      message.embeds.push(
-        new EmbedBuilder()
-          .setTitle(
-            res === 1
-              ? "Successfully saved score to database"
-              : "You already answered today",
-          )
-          .setColor(res === 1 ? "Green" : "Red"),
-      );
+    if (!isPass) {
+      if (wwydId >= 0) {
+        message.embeds.push(
+          new EmbedBuilder()
+            .setTitle(
+              res === 1
+                ? "Successfully saved score to database"
+                : "You already answered today",
+            )
+            .setColor(res === 1 ? "Green" : "Red"),
+        );
+      } else {
+        message.embeds.push(new EmbedBuilder().setTitle("hi").setColor("Red"));
+      }
     }
 
     try {
@@ -81,7 +88,7 @@ module.exports = {
       return;
     }
 
-    if (res === 1 && correct) {
+    if (res === 1 && correct && !(wwydId < 0 && !isAprilFirst)) {
       try {
         let season =
           await interaction.client.db.models.daily_toggle.getLatestSeason(
