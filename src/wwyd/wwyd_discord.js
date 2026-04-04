@@ -7,6 +7,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const sharp = require("sharp");
+const path = require("path");
 
 const SEAT_MAPPINGS = {
   E: "\u6771",
@@ -18,14 +19,13 @@ const SEAT_MAPPINGS = {
 const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
 const { getWwyd } = require("./wwyd_gen");
 const { formatAnalysisCompact } = require("./wwyd_pystyle");
-const fs = require("fs");
 
 const formatTile = (tile) => {
   return EMOJI_MAPPINGS[tile];
 };
 
 const generateHeader = ({ seat, round, turn }) =>
-  `Round:\u2009${SEAT_MAPPINGS[round]}\u2002Seat:\u2009${SEAT_MAPPINGS[seat]}\u2002Turn:\u2009${turn}`;
+  `Round:${SEAT_MAPPINGS[round]}\u2002Seat:${SEAT_MAPPINGS[seat]}\u2002Turn:${turn}`;
 
 const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const HEADER_HEIGHT = 75;
@@ -50,8 +50,8 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
 
   const header = generateHeader({ seat, round, turn });
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="60">
-  ${defs}
   <text x="0" y="32"
+    font-family="monospace"
     font-weight="800"
     font-size="33"
     fill="white"

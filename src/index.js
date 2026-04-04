@@ -4,28 +4,6 @@ const { loadCommands } = require("./commands/load_commands");
 const { loadEvents } = require("./events/load_events");
 const Database = require("./db");
 
-// Install Fonts onto Linux System
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const { execSync } = require("child_process");
-
-if (process.platform === "linux") {
-  console.log("Detected platform as linux, trying to install fonts");
-
-  const fontSrc = path.resolve("assets/fonts/JetBrainsMono-ExtraBold.ttf");
-  const fontDir = path.join(os.homedir(), ".fonts");
-  const fontDest = path.join(fontDir, "JetBrainsMono-ExtraBold.ttf");
-
-  console.log("Checking to see if font exists", fontDest);
-  if (!fs.existsSync(fontDest)) {
-    console.log("Installing fonts");
-    fs.mkdirSync(fontDir, { recursive: true });
-    fs.copyFileSync(fontSrc, fontDest);
-    execSync("fc-cache -f");
-  }
-}
-
 process.on("unhandledRejection", (error) => {
   console.error("Unhandled promise rejection:", error);
 });
