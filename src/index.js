@@ -11,11 +11,14 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 if (process.platform === "linux") {
+  console.log("Detected platform as linux, trying to install fonts");
+
   const fontSrc = path.resolve("assets/fonts/JetBrainsMono-ExtraBold.ttf");
   const fontDir = path.join(os.homedir(), ".local/share/fonts");
   const fontDest = path.join(fontDir, "JetBrainsMono-ExtraBold.ttf");
 
   if (!fs.existsSync(fontDest)) {
+    console.log("Installing fonts");
     fs.mkdirSync(fontDir, { recursive: true });
     fs.copyFileSync(fontSrc, fontDest);
     execSync("fc-cache -f");
