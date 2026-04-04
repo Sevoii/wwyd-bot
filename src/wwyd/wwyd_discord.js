@@ -7,24 +7,6 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const sharp = require("sharp");
-const path = require("node:path");
-
-let defs = "";
-
-if (process.platform === "win32") {
-  const jetbrainsMono = require("fs")
-    .readFileSync("assets/fonts/JetBrainsMono-ExtraBold.ttf")
-    .toString("base64");
-
-  defs = `<defs>
-    <style>
-      @font-face {
-        font-family: "JetBrains Mono";
-        src: url("data:font/truetype;base64,${jetbrainsMono}");
-      }
-    </style>
-  </defs>`;
-}
 
 const SEAT_MAPPINGS = {
   E: "\u6771",
@@ -70,7 +52,6 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="60">
   ${defs}
   <text x="0" y="32"
-    font-family="JetBrains Mono"
     font-weight="800"
     font-size="33"
     fill="white"
