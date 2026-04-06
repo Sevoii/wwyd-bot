@@ -114,7 +114,7 @@ module.exports = {
     console.log("Daily WWYD Sent Out");
 
     const date = new Date();
-    const isAprilFirst = date.getMonth() === 3 && date.getDay() === 1;
+    const isAprilFirst = date.getMonth() === 3 && date.getDate() === 1;
 
     if (channel) {
       await sendWwydMessage(client, channel.guild.id, channel, isAprilFirst);
