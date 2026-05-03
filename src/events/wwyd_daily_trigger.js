@@ -116,7 +116,7 @@ module.exports = {
     console.log("Daily WWYD Sent Out");
 
     const date = new Date();
-    const isAprilFirst = date.getMonth() === 3 && date.getDate() === 1;
+    const isAprilFirst = date.getMonth() === 3 && date.getDate() === 1; // for april fools
     const shouldAutoseason = date.getDate() === 1; // for autoseason
 
     if (channel) {
@@ -145,7 +145,7 @@ module.exports = {
         }
 
         if (
-          channel?.isTextBased() &&
+          !channel?.isTextBased() ||
           !(await sendWwydMessage(
             client,
             entry.guild_id,
@@ -153,7 +153,7 @@ module.exports = {
             isAprilFirst,
           ))
         ) {
-          to_delete.push(channel);
+          to_delete.push(entry.channel_id);
           console.log(`Channel Error for ${entry.guild_id}`);
         }
       }

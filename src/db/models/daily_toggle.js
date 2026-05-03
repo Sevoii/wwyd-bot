@@ -5,7 +5,11 @@ module.exports = class DailyToggle {
 
   async getDailyChannels() {
     try {
-      return await this.db.all(`SELECT * FROM WwydChannels`, {});
+      return await this.db.all(
+        `SELECT *
+         FROM WwydChannels`,
+        {},
+      );
     } catch (err) {
       console.error(err);
       return [];
@@ -14,12 +18,50 @@ module.exports = class DailyToggle {
 
   async getAutoseasonGuilds() {
     try {
-      return await this.db.all(`SELECT guild_id
-                                FROM WwydChannels
-                                WHERE autoseason = 1;`, {});
+      return await this.db.all(
+        `SELECT guild_id
+         FROM WwydChannels
+         WHERE autoseason = 1;`,
+        {},
+      );
     } catch (err) {
       console.error(err);
       return [];
+    }
+  }
+
+  async toggleAutoseason(guildId) {
+    try {
+      await this.db.run(`BEGIN TRANSACTION;`);
+      const entry = await this.db.get(
+        `SELECT *
+         FROM WwydChannels
+         WHERE guild_id = @guildId`,
+        {
+          guildId,
+        },
+      );
+
+      if (entry) {
+        await this.db.run(
+          `
+            UPDATE WwydChannels
+            SET autoseason = @updated
+            WHERE guild_id = @guildId`,
+          { guildId, updated: 1 - entry.autoseason },
+        );
+
+        await this.db.run(`COMMIT;`);
+        return 1 - entry.autoseason;
+      } else {
+        await this.db.run(`ROLLBACK;`);
+        return -1;
+      }
+    } catch (err) {
+      console.error(err);
+
+      await this.db.run(`ROLLBACK;`);
+      return -1;
     }
   }
 
@@ -29,7 +71,9 @@ module.exports = class DailyToggle {
 
       for (let channelId of channels) {
         await this.db.run(
-          `DELETE FROM WwydChannels WHERE channel_id = @channelId`,
+          `DELETE
+           FROM WwydChannels
+           WHERE channel_id = @channelId`,
           { channelId },
         );
       }
@@ -48,14 +92,18 @@ module.exports = class DailyToggle {
 
       if (
         await this.db.get(
-          `SELECT * FROM WwydChannels WHERE guild_id = @guildId`,
+          `SELECT *
+           FROM WwydChannels
+           WHERE guild_id = @guildId`,
           {
             guildId,
           },
         )
       ) {
         await this.db.run(
-          `DELETE FROM WwydChannels WHERE guild_id = @guildId`,
+          `DELETE
+           FROM WwydChannels
+           WHERE guild_id = @guildId`,
           {
             guildId,
           },
@@ -66,11 +114,11 @@ module.exports = class DailyToggle {
       } else {
         await this.db.run(
           `
-          INSERT INTO WwydChannels (guild_id, channel_id)
-          VALUES (@guildId, @channelId)
-          ON CONFLICT(guild_id)
-            DO UPDATE SET channel_id = @channelId;
-        `,
+            INSERT INTO WwydChannels (guild_id, channel_id)
+            VALUES (@guildId, @channelId)
+            ON CONFLICT(guild_id)
+              DO UPDATE SET channel_id = @channelId;
+          `,
           { guildId, channelId },
         );
 
@@ -118,10 +166,10 @@ module.exports = class DailyToggle {
 
       await this.db.run(
         `
-        INSERT INTO Season (guild_id, season)
-        VALUES (@guildId, @season)
-        ON CONFLICT (guild_id, season) DO NOTHING;
-      `,
+          INSERT INTO Season (guild_id, season)
+          VALUES (@guildId, @season)
+          ON CONFLICT (guild_id, season) DO NOTHING;
+        `,
         { guildId, season: season + 1 },
       );
 
@@ -139,10 +187,10 @@ module.exports = class DailyToggle {
     try {
       let season = await this.db.get(
         `
-        SELECT MAX(season) AS current_season
-        FROM Season
-        WHERE guild_id = @guildId
-          AND is_active = 1;`,
+          SELECT MAX(season) AS current_season
+          FROM Season
+          WHERE guild_id = @guildId
+            AND is_active = 1;`,
         { guildId },
       );
 

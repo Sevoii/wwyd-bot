@@ -22,6 +22,11 @@ module.exports = {
     .addSubcommand((subcommand) =>
       subcommand.setName("new_season").setDescription("Creates a new season"),
     )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("auto_season")
+        .setDescription("Toggles autoseason for the server"),
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .setContexts(InteractionContextType.Guild),
   async execute(interaction) {
@@ -65,6 +70,17 @@ module.exports = {
 
       if (res === 1) {
         await interaction.reply("OK");
+      } else {
+        await interaction.reply("Failed to set new season, try again");
+      }
+    } else if (subcommand === "auto_season") {
+      let res =
+        await interaction.client.db.models.daily_toggle.toggleAutoseason(
+          interaction.guildId,
+        );
+
+      if (res === 1 || res === 0) {
+        await interaction.reply("Autoseason toggled " + ["off", "on"][res]);
       } else {
         await interaction.reply("Failed to set new season, try again");
       }
