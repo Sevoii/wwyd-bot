@@ -1,3 +1,5 @@
+const { DateTime } = require("luxon");
+
 const wwyd = require("../assets/wwyd.json");
 
 const funnyWwyd = {
@@ -32,7 +34,11 @@ const randomWwyd = () => {
 };
 
 const randomWwydDaily = (seed) => {
-  const offset = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % wwyd.length;
+  const now = DateTime.now().setZone('America/New_York');
+  const boundary = now.set({ hour: 9, minute: 59, second: 0, millisecond: 0 });
+  const effective = now < boundary ? now.minus({ days: 1 }) : now;
+
+  const offset = Math.floor(effective.startOf('day').toMillis() / (1000 * 60 * 60 * 24) + 2) % wwyd.length;
 
   // 568 has factors 1,2,71 so just use an odd number 9-69
   // Factor based on seed so different guilds have different factors if their starting seed is same
