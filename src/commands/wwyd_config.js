@@ -49,6 +49,12 @@ module.exports = {
         await interaction.reply(
           `Successfully enabled WWYD in <#${interaction.channelId}>`,
         );
+
+        interaction.client.emit(
+          "WWYD_Daily",
+          interaction.client,
+          interaction.channel,
+        );
       } else if (res === 0) {
         await interaction.reply(
           `Successfully disabled WWYD in <#${interaction.channelId}>`,
