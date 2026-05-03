@@ -2,12 +2,20 @@
 
 ## `SchemaMigration`
 
+Contains history of which migrations were performed when
+
+Key: `(version)`
+
 | Field     | Datatype  | Description               | Notes                     |
 |-----------|-----------|---------------------------|---------------------------|
 | `name`    | `TEXT`    | Name of the patch applied | Only used for maintainers |
 | `version` | `INTEGER` | ID of the patch applied   |                           | 
 
 ## `UserScore`
+
+Contains basic user data including streak data as it is preserved through seasons. Scores are in `SeasonScores`.
+
+Key: `(guild_id, discord_id)`
 
 | Field         | Datatype       | Description                              | Notes |
 |---------------|----------------|------------------------------------------|-------|
@@ -18,6 +26,10 @@
 
 ## `Season`
 
+Contains basic season info. New seasons are inactive until the daily trigger.
+
+Key: `(guild_id, season)`
+
 | Field       | Datatype      | Description                                   | Notes                                                 |
 |-------------|---------------|-----------------------------------------------|-------------------------------------------------------|
 | `guild_id`  | `VARCHAR(18)` | Discord Guild ID where the user answered      |                                                       |
@@ -25,6 +37,10 @@
 | `is_active` | `BOOLEAN`     | Whether the season is currently active or not | Stored as an integer due to SQLITE not having BOOLEAN | 
 
 ## `SeasonScores`
+
+Contains scores for each user.
+
+Key: `(guild_id, discord_id)`
 
 | Field        | Datatype       | Description                              | Notes           |
 |--------------|----------------|------------------------------------------|-----------------|
@@ -36,12 +52,20 @@
 
 ## `WwydChannels`
 
+Contains list of channels which we need to send daily messages to.
+
+Key: `(guild_id)`
+
 | Field        | Datatype       | Description                                         | Notes                      |
 |--------------|----------------|-----------------------------------------------------|----------------------------|
 | `guild_id`   | `VARACHAR(18)` | Discord Guild Id where the problem is sent          |                            |
 | `channel_id` | `VARCHAR(18)`  | Discord Channel Id where the message should be sent | Needed to edit the message |
 
 ## `WwydDaily`
+
+List of wwyd messages that we've sent out.
+
+Key: `(guild_id, problem_id)`
 
 | Field         | Datatype       | Description                                   | Notes                             |
 |---------------|----------------|-----------------------------------------------|-----------------------------------|
@@ -53,6 +77,10 @@
 | `created`     | `DATETIME`     | Datetime of when the message was sent         |                                   |
 
 ## `WwydScore`
+
+Internal list of scores which is not used anywhere.
+
+Key: `(guild_id, problem_id, discord_id)`
 
 | Field        | Datatype       | Description                              | Notes                                                 |
 |--------------|----------------|------------------------------------------|-------------------------------------------------------|
