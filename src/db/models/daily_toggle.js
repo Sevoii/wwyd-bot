@@ -12,6 +12,17 @@ module.exports = class DailyToggle {
     }
   }
 
+  async getAutoseasonGuilds() {
+    try {
+      return await this.db.all(`SELECT guild_id
+                                FROM WwydChannels
+                                WHERE autoseason = 1;`, {});
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
   async deleteDailyChannels(channels) {
     try {
       await this.db.run("BEGIN TRANSACTION;");

@@ -84,27 +84,29 @@ const sendWwydMessage = async (client, guildId, channel, funny = false) => {
 
   const message = await generateQuestionMessage(i, wwyd, "wwyd_daily");
 
-  try {
-    const sent = await channel.send(message);
-    if (i >= 0) {
-      await client.db.models.daily_message.setLatestWwyd(
-        guildId,
-        uuid,
-        i,
-        channel.id,
-        sent.id,
+  for (let k = 0; k < 3; k++) {
+    try {
+      const sent = await channel.send(message);
+      if (i >= 0) {
+        await client.db.models.daily_message.setLatestWwyd(
+          guildId,
+          uuid,
+          i,
+          channel.id,
+          sent.id,
+        );
+      }
+
+      return true;
+    } catch (err) {
+      console.error(
+        `Attempt ${k + 1}: Could not send new wwyd for guild ${guildId} in channel ${channel.id}`,
+        err,
       );
     }
-
-    return true;
-  } catch (err) {
-    console.error(
-      `Could not send new wwyd for guild ${guildId} in channel ${channel.id}`,
-      err,
-    );
-
-    return false;
   }
+
+  return false;
 };
 
 module.exports = {
@@ -115,11 +117,18 @@ module.exports = {
 
     const date = new Date();
     const isAprilFirst = date.getMonth() === 3 && date.getDate() === 1;
+    const shouldAutoseason = date.getDate() === 1; // for autoseason
 
     if (channel) {
+      // Force WWYD
       await sendWwydMessage(client, channel.guild.id, channel, isAprilFirst);
     } else {
       // A new day! Updates the seasons for all servers
+      if (shouldAutoseason) {
+        for (let entry of await client.db.models.daily_toggle.getAutoseasonGuilds()) {
+          await client.db.models.daily_toggle.stageNewSeason(entry.guild_id);
+        }
+      }
       await client.db.models.daily_toggle.commitNewSeasons();
 
       const to_delete = [];
@@ -145,6 +154,7 @@ module.exports = {
           ))
         ) {
           to_delete.push(channel);
+          console.log(`Channel Error for ${entry.guild_id}`);
         }
       }
 
