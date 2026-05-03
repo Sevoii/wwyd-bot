@@ -41,7 +41,7 @@ const generateLeaderboard = async (db, guildId, season) => {
   };
 };
 
-const generateScore = async (db, guildId, discordId, season) => {
+const generateScore = async (db, guildId, discordId, season, hidden) => {
   if (season == null) {
     season = await db.models.daily_toggle.getLatestSeason(guildId);
     if (season === -1) {
@@ -58,7 +58,7 @@ const generateScore = async (db, guildId, discordId, season) => {
   );
 
   if (score != null) {
-    return {
+    const message = {
       embeds: [
         new EmbedBuilder()
           .setTitle("WWYD Daily Score")
@@ -85,6 +85,12 @@ const generateScore = async (db, guildId, discordId, season) => {
           .setFooter({ text: `Season: ${season}` }),
       ],
     };
+
+    if (hidden) {
+      message.flags = MessageFlags.Ephemeral;
+    }
+
+    return message;
   } else {
     return {
       embeds: [

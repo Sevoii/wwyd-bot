@@ -14,13 +14,14 @@ Massive thanks to the folks at UW Riichi Club for inspiring this project.
 Daily Wwyd:
 
 * `/wwyd leaderboard`: Guild leaderboard. Optional parameter `season` to select which season to use
-* `/wwyd score`: Guild score. Optional parameter `season` to select which season to use
+* `/wwyd score`: Guild score. Optional parameter `season` to select which season to use, optional parameter `hidden` if you want the score to be hidden or not.
 
 Wwyd Config (Requires Manage-Channels Permission to use)
 
 * `/wwyd_config toggle`: Toggles wwyd daily for the channel
 * `/wwyd_config force`: Forces the bot to send a daily WWYD in the channel
 * `/wwyd_config new_season`: Creates a new season for the server. The next wwyd sent will 
+* `/wwyd_config autoseason`: Toggles autoseason for the guild. New seasons will begin on the 1st of every month. 
 
 Random Commands:
 

@@ -27,6 +27,13 @@ module.exports = {
             .setDescription(
               "Season stats that you want to fetch, default to current season",
             ),
+        )
+        .addBooleanOption((option) =>
+          option
+            .setName("hidden")
+            .setDescription(
+              "Whether you want the message to be hidden from others or not, defaults to public",
+            ),
         ),
     )
     .addSubcommand((subcommand) =>
@@ -54,6 +61,7 @@ module.exports = {
           interaction.guildId,
           interaction.member.id,
           options.getNumber("season"),
+          options.getBoolean("hidden"),
         ),
       );
     } else if (subcommand === "season") {
