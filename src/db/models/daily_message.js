@@ -48,17 +48,11 @@ module.exports = class DailyMessage {
         });
 
         const data2 = await this.db.all(
-          `SELECT s.discord_id AS discord_id, ss.score AS score, s.correct as correct, s.answer as answer
-           FROM WwydScore s
-                  JOIN UserScore us
-                       ON s.discord_id = us.discord_id AND s.guild_id = us.guild_id
-                  LEFT JOIN SeasonScores ss
-                            ON us.discord_id = ss.discord_id
-                              AND us.guild_id = ss.guild_id
-           WHERE s.guild_id = @guildId
-             AND s.problem_id = @problemId
+          `SELECT discord_id, answer, correct
+           FROM WwydScore
+           WHERE guild_id = @guildId
+             AND problem_id = @problemId
              AND answer != 'na'
-           ORDER BY s.correct DESC, ss.score DESC
           `, {
           guildId,
           problemId: data.problem_id,
@@ -71,11 +65,11 @@ module.exports = class DailyMessage {
             internalId: data.internal_id,
             successes: data1.successes ?? 0,
             attempts: data1.attempts ?? 0,
-            answerers: data2
-              .filter((x) => x.correct > 0)
-              .map((x) => {
-                return { discord_id: x.discord_id, score: x.score };
-              }),
+            // answerers: data2
+            //   .filter((x) => x.correct > 0)
+            //   .map((x) => {
+            //     return { discord_id: x.discord_id, score: x.score };
+            //   }),
             answerCounts: data2.reduce((acc, x) => {
               acc[x.answer] = (acc[x.answer] || 0) + 1;
               return acc;
