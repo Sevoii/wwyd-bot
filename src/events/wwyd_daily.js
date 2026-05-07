@@ -24,7 +24,7 @@ module.exports = {
     }
 
     const wwydId = buttonData[1];
-    const correct = buttonData[3] === getWwyd(wwydId).answer;
+    const correct = getWwyd(wwydId).answer.includes(buttonData[3]);
     const isPass = buttonData[3] === "na";
     let res = 1;
 

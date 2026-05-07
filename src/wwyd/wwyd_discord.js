@@ -237,7 +237,7 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
 
   const embed = new EmbedBuilder()
     .setTitle(
-      `Answer: ${hide ? "||" : ""}${formatTile(wwyd.answer)}${hide ? "||" : ""}`,
+      `Answer: ${hide ? "||" : ""}${Array.isArray(wwyd.answer) ? wwyd.answer.map(formatTile).join(",") : formatTile(wwyd.answer)}${hide ? "||" : ""}`,
     )
     .setDescription(description)
     // .setFields([
@@ -248,7 +248,7 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
     //   },
     // ])
     .setColor(
-      answer === "na" ? "Blue" : answer === wwyd.answer ? "Green" : "Red",
+      answer === "na" ? "Blue" : wwyd.answer.includes(answer) ? "Green" : "Red",
     )
     .setFooter({
       text: `Source: ${wwyd.source}`,
