@@ -166,9 +166,9 @@ const getOptions = ({ hand, draw }) => {
   return hand.filter((item, index) => hand.indexOf(item) === index);
 };
 
-const getWwydUUID = (i, wwyd) => {
+const getWwydUUID = ({ source }) => {
   const date = new Date();
-  return date.toISOString().slice(0, 10).replace(/-/g, "") + "-" + i;
+  return date.toISOString().slice(0, 10).replace(/-/g, "") + "-" + source;
 };
 
 const STYLE_MAPPING = {
@@ -177,7 +177,7 @@ const STYLE_MAPPING = {
   s: ButtonStyle.Success,
 };
 
-const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
+const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
   const image = await generateImage(wwyd);
   const options = getOptions(wwyd);
 
@@ -189,14 +189,14 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
 
   const actionRows = [];
 
-  const uuid = getWwydUUID(i, wwyd);
+  const uuid = getWwydUUID(wwyd);
 
   for (let j = 0; j < options.length; j += 5) {
     actionRows.push(
       new ActionRowBuilder().addComponents(
         options.slice(j, j + 5).map((x) =>
           new ButtonBuilder()
-            .setCustomId(`${label}:${i}:${uuid}:${x}`)
+            .setCustomId(`${label}:${wwyd.source}:${uuid}:${x}`)
             .setLabel(x)
             // .setEmoji(EMOJI_MAPPINGS[x])
             .setStyle(STYLE_MAPPING[x[1]] ?? ButtonStyle.Primary),
@@ -208,7 +208,7 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   actionRows.push(
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`${label}:${i}:${uuid}:na`)
+        .setCustomId(`${label}:${wwyd.source}:${uuid}:na`)
         .setLabel("pass")
         .setStyle(ButtonStyle.Primary),
     ),
@@ -227,8 +227,8 @@ const generateQuestionMessage = async (i, wwyd, label, ephemeral = false) => {
   return message;
 };
 
-const generateAnswerMessage = async (i, answer, hide = false) => {
-  const wwyd = getWwyd(i);
+const generateAnswerMessage = async (internalId, answer, hide = false) => {
+  const wwyd = getWwyd(internalId);
 
   const image = await generateImage(wwyd);
   const description = generateDescription(wwyd, hide);
