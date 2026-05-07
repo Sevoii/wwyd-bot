@@ -60,8 +60,8 @@ const funnyWwydDaily = (seed) => {
 };
 
 const isNormalWwyd = (source) => {
-  if (Number.isInteger(Number(source))) return source < 0;
-  return source.startsWith("funny-");
+  if (Number.isInteger(Number(source))) return source >= 0;
+  return !source.startsWith("funny-");
 };
 
 const getWwyd = (i) => {
