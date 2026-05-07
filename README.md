@@ -3,8 +3,6 @@
 This bot sends out Riichi Mahjong WWYD quizzes every day at 10am ET for members to complete. It includes a leaderboard
 with stat tracking, and offers members an option to do practice WWYDs.
 
-Massive thanks to the folks at UW Riichi Club for inspiring this project.
-
 ## Invite
 
 [Discord OAuth Invite Link](https://discord.com/oauth2/authorize?client_id=1434270517128466574&permissions=68608&integration_type=0&scope=bot+applications.commands)
@@ -43,3 +41,8 @@ To practice on your own, you can do `wwyd_random` which will send an ephermeal m
 ![Daily WWYD Quiz Answer](docs/images/daily_example_answer.png)
 
 ![WWYD Quiz Leaderboard](docs/images/leaderboard.png)
+
+
+## Credits
+
+A big hanks to everyone who contributed to making this bot possible. Special acknowledgment is given to the UW Riichi Club for providing the Uzaku WWYDs, Zihao Huang for adding sources to the Uzaku WWYDs, and Hue for editing and proofreading the nanikiru WWYDs. 
