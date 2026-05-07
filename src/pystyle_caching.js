@@ -27,8 +27,8 @@ const formatJson = (arr) => {
 (async () => {
   let c = 0;
   for (let i of wwyd) {
-    // Skip empty wwyds
-    // if (!i.pystyle.length) continue;
+    // Skip wwyds with things
+    if ('pystyle' in i) continue;
 
     if (++c % 10 === 0) {
       console.log(`Parsing ${c}'th wwyd`);
@@ -64,7 +64,7 @@ const formatJson = (arr) => {
       }
     }
 
-    i.pystyle = resp != null ? convertResponseData(resp, parseInt(i.turn)) : resp;
+    i.pystyle = resp != null ? convertResponseData(resp, parseInt(i.turn)) : [];
     await sleep(500);
   }
 
