@@ -1,6 +1,6 @@
 const { Events, MessageFlags, EmbedBuilder } = require("discord.js");
 const { generateAnswerMessage } = require("../wwyd/wwyd_discord");
-const { getWwyd } = require("../wwyd/wwyd_gen");
+const { getWwyd, isNormalWwyd } = require("../wwyd/wwyd_gen");
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -23,12 +23,12 @@ module.exports = {
       return;
     }
 
-    const wwydId = parseInt(buttonData[1]);
+    const wwydId = buttonData[1];
     const correct = buttonData[3] === getWwyd(wwydId).answer;
     const isPass = buttonData[3] === "na";
-    let res;
+    let res = 1;
 
-    if (wwydId >= 0) {
+    if (isNormalWwyd(wwydId)) {
       res = await interaction.client.db.models.daily_answers.addAnswer(
         interaction.guildId,
         interaction.member.id,
@@ -37,8 +37,6 @@ module.exports = {
         correct ? 1 : 0,
         isPass,
       );
-    } else {
-      res = 1;
     }
 
     if (res === -1) {
@@ -58,12 +56,12 @@ module.exports = {
     }
 
     const message = await generateAnswerMessage(
-      parseInt(buttonData[1]),
+      buttonData[1],
       buttonData[3],
     );
 
     if (!isPass) {
-      if (wwydId >= 0) {
+      if (isNormalWwyd(buttonData[1])) {
         message.embeds.push(
           new EmbedBuilder()
             .setTitle(
@@ -74,7 +72,7 @@ module.exports = {
             .setColor(res === 1 ? "Green" : "Red"),
         );
       } else {
-        message.embeds.push(new EmbedBuilder().setTitle("hi").setColor("Red"));
+        message.embeds.push(new EmbedBuilder().setTitle("Your score was not saved :c").setColor("Red"));
       }
     }
 

@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const message = await generateAnswerMessage(
-      parseInt(buttonData[1]),
+      buttonData[1],
       buttonData[3],
     );
 

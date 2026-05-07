@@ -2,8 +2,11 @@ const { DateTime } = require("luxon");
 
 const wwyd = require("../assets/wwyd.json");
 
+// cache the reverse lookup
+const wwydIdx = Object.fromEntries(wwyd.map((item, idx) => [item.source, idx]));
+
 const funnyWwyd = {
-  source: "I blame Entree for not giving me a better question",
+  source: "funny-0",
   seat: "E",
   round: "E",
   turn: "1",
@@ -30,34 +33,56 @@ const funnyWwyd = {
 
 const randomWwyd = () => {
   const i = Math.floor(Math.random() * wwyd.length);
-  return [i, wwyd[i]];
+  return wwyd[i];
 };
 
 const randomWwydDaily = (seed) => {
-  const now = DateTime.now().setZone('America/New_York');
+  const now = DateTime.now().setZone("America/New_York");
   const boundary = now.set({ hour: 9, minute: 59, second: 0, millisecond: 0 });
   const effective = now < boundary ? now.minus({ days: 1 }) : now;
 
-  const offset = Math.floor(effective.startOf('day').toMillis() / (1000 * 60 * 60 * 24) + 2) % wwyd.length;
+  const offset =
+    Math.floor(
+      effective.startOf("day").toMillis() / (1000 * 60 * 60 * 24) + 2,
+    ) % wwyd.length;
 
   // 1121 has factors 1,19,59 so just use a number 18-58
   // Factor based on seed so different guilds have different factors if their starting seed is same
-  const factor = 18 + seed % 40;
+  const factor = 18 + (seed % 40);
 
   const i = (seed + factor * offset) % wwyd.length;
 
-  return [i, wwyd[i]];
+  return wwyd[i];
 };
 
 const funnyWwydDaily = (seed) => {
-  return [-1, funnyWwyd];
+  return funnyWwyd;
+};
+
+const isNormalWwyd = (source) => {
+  if (Number.isInteger(Number(source))) return source < 0;
+  return source.startsWith("funny-");
 };
 
 const getWwyd = (i) => {
-  if (i === -1) {
-    return funnyWwyd;
+  // Legacy - to be removed
+  if (Number.isInteger(Number(i))) {
+    if (isNormalWwyd(i)) {
+      return wwyd[parseInt(i)];
+    } else {
+      return funnyWwyd;
+    }
   } else {
-    return wwyd[i];
+    if (isNormalWwyd(i)) {
+      const idx = wwydIdx[i];
+      if (idx != null) {
+        return wwyd[idx];
+      } else {
+        return null;
+      }
+    } else {
+      return funnyWwyd;
+    }
   }
 };
 
@@ -66,4 +91,5 @@ module.exports = {
   randomWwydDaily,
   funnyWwydDaily,
   getWwyd,
+  isNormalWwyd,
 };

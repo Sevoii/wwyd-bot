@@ -9,9 +9,7 @@ module.exports = {
       "Generates a random WWYD that does not count towards the leaderboard",
     ),
   async execute(interaction) {
-    const [i, wwyd] = randomWwyd();
-
-    const message = await generateQuestionMessage(i, wwyd, "wwyd_random", true);
+    const message = await generateQuestionMessage(randomWwyd(), "wwyd_random", true);
     await interaction.reply(message);
   },
 };
