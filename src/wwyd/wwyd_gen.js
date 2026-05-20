@@ -31,6 +31,32 @@ const funnyWwyd = {
   comment: ["DREAM FOR THE BIG SEVEN STARS ☄☄☄☄☄☄☄"],
 };
 
+const unknownWwyd = {
+  source: "unknown",
+  seat: "E",
+  round: "E",
+  turn: "1",
+  indicator: "5z",
+  hand: [
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+    "5z",
+  ],
+  draw: "5z",
+  answer: "na",
+  comment: ["Unable to find wwyd."],
+};
+
 const randomWwyd = () => {
   const i = Math.floor(Math.random() * wwyd.length);
   return wwyd[i];
@@ -60,8 +86,8 @@ const funnyWwydDaily = (seed) => {
 };
 
 const isNormalWwyd = (source) => {
-  if (Number.isInteger(Number(source))) return source >= 0;
-  return !source.startsWith("funny-");
+  if (Number.isInteger(Number(source))) return source >= 0;  // legacy id
+  return !source.startsWith("funny-") && source !== "unknown";  // source is an id
 };
 
 const getWwyd = (i) => {
@@ -78,7 +104,7 @@ const getWwyd = (i) => {
       if (idx != null) {
         return wwyd[idx];
       } else {
-        return null;
+        return unknownWwyd;
       }
     } else {
       return funnyWwyd;
