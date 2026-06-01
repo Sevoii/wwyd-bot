@@ -13,7 +13,7 @@ module.exports = {
           option
             .setName("season")
             .setDescription(
-              "Season stats that you want to fetch, default to current season",
+              "Season stats that you want to fetch, default to current season. Use 0 for total score.",
             ),
         ),
     )
@@ -25,7 +25,7 @@ module.exports = {
           option
             .setName("season")
             .setDescription(
-              "Season stats that you want to fetch, default to current season",
+              "Season stats that you want to fetch, default to current season. Use 0 for total score.",
             ),
         )
         .addBooleanOption((option) =>

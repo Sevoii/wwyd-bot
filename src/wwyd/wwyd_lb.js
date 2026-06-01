@@ -34,8 +34,9 @@ const generateLeaderboard = async (db, guildId, season) => {
         })
         .join("\n") + "\n",
     )
-    .setFooter({ text: `Season: ${season}` });
-
+    .setFooter({
+      text: season !== 0 ? `Season: ${season}` : "Total",
+    });
   return {
     embeds: [embed],
   };
@@ -82,7 +83,9 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
           )
           // .setDescription(`<@${discordId}>'s Score: ${score.score}`)
           .setColor("Green")
-          .setFooter({ text: `Season: ${season}` }),
+          .setFooter({
+            text: season !== 0 ? `Season: ${season}` : "Total",
+          }),
       ],
     };
 
