@@ -1,12 +1,23 @@
-const { funnyWwydDaily, randomWwydDaily, isNormalWwyd } = require("../wwyd/wwyd_gen");
+const {
+  funnyWwydDaily,
+  randomWwydDaily,
+  isNormalWwyd,
+} = require("../wwyd/wwyd_gen");
 const {
   generateQuestionMessage,
   generateAnswerMessage,
   getWwydUUID,
 } = require("../wwyd/wwyd_discord");
 const { EmbedBuilder } = require("discord.js");
+const { generateLeaderboard } = require("../wwyd/wwyd_lb");
 
-const sendWwydMessage = async (client, guildId, channel, funny = false) => {
+const sendWwydMessage = async (
+  client,
+  guildId,
+  channel,
+  funny = false,
+  showLeaderboard = false,
+) => {
   const wwyd = funny
     ? funnyWwydDaily(parseInt(guildId.substring(1, 10)))
     : randomWwydDaily(parseInt(guildId.substring(1, 10)));
@@ -62,17 +73,12 @@ const sendWwydMessage = async (client, guildId, channel, funny = false) => {
                   .join(", ")}`,
               )
               .setColor("#d9a441"),
-            // .setColor("Green")
-            // .addFields({
-            //   name: "Correct Answerers",
-            //   value: prevData.answerers
-            //     .map(
-            //       (x, i) => `${i + 1}. <@${x.discord_id}> - ${x.score} pts`,
-            //     )
-            //     .join("\n"),
-            // }),
           ],
         });
+
+        if (showLeaderboard) {
+          await prevChannel.send(generateLeaderboard(client.db, guildId));
+        }
       } catch (err) {
         console.error(
           `Could not send wwyd message stats for guild ${guildId}`,
