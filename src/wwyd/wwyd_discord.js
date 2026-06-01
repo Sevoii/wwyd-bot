@@ -24,6 +24,11 @@ const formatTile = (tile) => {
   return EMOJI_MAPPINGS[tile];
 };
 
+const getImagePath = (tile) => {
+  // sanitization in case malicious actors or something
+  return path.join(__dirname, "../assets/tiles", `${tile.substring(0, 2)}.png`);
+};
+
 const generateHeader = ({ seat, round, turn }) =>
   `Round:${SEAT_MAPPINGS[round]}\u2002Seat:${SEAT_MAPPINGS[seat]}\u2002Turn:${turn}`;
 
@@ -38,7 +43,7 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   hand.push(draw);
 
   const composite = hand.map((x, index) => ({
-    input: path.join(__dirname, "../assets/tiles", `${x}.png`),
+    input: getImagePath(x),
     left:
       index === hand.length - 1
         ? index * TILE_WIDTH + TILE_GAP
@@ -67,14 +72,10 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
     top: 20,
   });
 
-  const indicatorImage = await sharp(
-    path.join(__dirname, "../assets/tiles", `${indicator}.png`),
-  )
+  const indicatorImage = await sharp(getImagePath(indicator))
     .resize({ width: DORA_WIDTH })
     .toBuffer();
-  const doraBack = await sharp(
-    path.join(__dirname, "../assets/tiles", `tile_back.png`),
-  )
+  const doraBack = await sharp(getImagePath("tb"))
     .resize({ width: DORA_WIDTH })
     .toBuffer();
 
@@ -107,37 +108,6 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
     .composite(composite)
     .toFormat("png", { quality: 100 })
     .toBuffer();
-
-  // return sharp(path.join(__dirname, "../assets/wwyd_base.png")).composite(hand.map((x, i) => {
-  //   return {
-  //     input: path.join(__dirname, "../assets/tiles", `${x}.png`),
-  //     top: 74,
-  //     left: i * 80
-  //   };
-  // }).concat([
-  //   {
-  //     input: path.join(__dirname, "../assets/tiles", `${draw}.png`),
-  //     top: 74,
-  //     left: 1060
-  //   },
-  //   {
-  //     input: await sharp(path.join(__dirname, "../assets/tiles", `${indicator}.png`)).resize(35, 56).toBuffer(),
-  //     top: 7,
-  //     left: 550
-  //   },
-  //   {
-  //     input: {
-  //       text: {
-  //         text: `<span foreground="white"><b>Round:${MAPPINGS[round]} Seat:${MAPPINGS[seat]} Turn:${turn}</b></span>`,
-  //         dpi: 200,
-  //         rgba: true,
-  //         font: "monospace"
-  //       }
-  //     },
-  //     left: 20,
-  //     top: 20
-  //   }
-  // ]));
 };
 
 const generateDescription = ({ comment }, hide = false) => {
