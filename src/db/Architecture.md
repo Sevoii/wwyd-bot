@@ -68,14 +68,14 @@ List of wwyd messages that we've sent out.
 
 Key: `(guild_id, problem_id)`
 
-| Field         | Datatype       | Description                                   | Notes                             |
-|---------------|----------------|-----------------------------------------------|-----------------------------------|
-| `guild_id`    | `VARACHAR(18)` | Discord Guild Id where the problem is sent    |                                   |
-| `problem_id`  | `VARACHAR(18)` | Internally Generated Problem Id               | Used to make people not answer qs |
-| `internal_id` | `INTEGER`      | Internal ID of the wwyd                       | Fairly fragile                    |
-| `channel_id`  | `VARCHAR(18)`  | Discord Channel Id where the message was sent | Needed to edit the message        |
-| `message_id`  | `VARCHAR(18)`  | Discord Message Id of the message             | Needed to edit the message        |
-| `created`     | `DATETIME`     | Datetime of when the message was sent         |                                   |
+| Field         | Datatype       | Description                                   | Notes                                        |
+|---------------|----------------|-----------------------------------------------|----------------------------------------------|
+| `guild_id`    | `VARACHAR(18)` | Discord Guild Id where the problem is sent    |                                              |
+| `problem_id`  | `VARACHAR(18)` | Internally Generated Problem Id               | Used to make people not answer qs            |
+| `internal_id` | `TEXT`         | Internal ID of the wwyd                       | Corresponds with the problem id in our WWYDs |
+| `channel_id`  | `VARCHAR(18)`  | Discord Channel Id where the message was sent | Needed to edit the message                   |
+| `message_id`  | `VARCHAR(18)`  | Discord Message Id of the message             | Needed to edit the message                   |
+| `created`     | `DATETIME`     | Datetime of when the message was sent         |                                              |
 
 ## `WwydScore`
 
