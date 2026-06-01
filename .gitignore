@@ -7,3 +7,4 @@ wwyd.db-wal
 backups
 socks_proxies.json
 test.js
+backup-*
