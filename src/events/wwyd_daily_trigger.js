@@ -75,10 +75,6 @@ const sendWwydMessage = async (
               .setColor("#d9a441"),
           ],
         });
-
-        if (showLeaderboard) {
-          await prevChannel.send(generateLeaderboard(client.db, guildId));
-        }
       } catch (err) {
         console.error(
           `Could not send wwyd message stats for guild ${guildId}`,
