@@ -200,13 +200,13 @@ function formatAnalysisCompact(rows, limit = 10, hide = false) {
   rows.sort((a, b) => b.value - a.value);
   const data = [...rows].slice(0, limit);
 
-  const head = "    Waits  Tiles              EV     Win%    Tenpai";
+  const head = "    Waits  Tiles           EV     Win%    Tenpai";
   const lines = [head];
 
   for (const r of data) {
     const tile = `${r.tile}${r.back ? "*" : " "}`;
     const waits = pad(`${r.wait_count}(${r.wait_unique})`, 6);
-    const tiles = pad(compressNotation(r.wait_types).slice(0, 18), 18);
+    const tiles = pad(compressNotation(r.wait_types).slice(0, 18), 15);
     const ev = pad(r.value.toFixed(0), 6);
     const win = pad(pct(r.winning), 7);
     const ten = pad(pct(r.tenpai), 7);

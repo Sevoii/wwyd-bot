@@ -18,10 +18,18 @@ const SEAT_MAPPINGS = {
 
 const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
 const { getWwyd } = require("./wwyd_gen");
-const { formatAnalysisCompact } = require("./wwyd_pystyle");
+const {
+  formatAnalysisCompact: formatAnalysisCompactPystyle,
+} = require("./pystyle");
+const { formatAnalysisCompact: formatAnalysisCompactNaga } = require("./naga");
 
 const formatTile = (tile) => {
   return EMOJI_MAPPINGS[tile];
+};
+
+const getImagePath = (tile) => {
+  // sanitization in case malicious actors or something
+  return path.join(__dirname, "../assets/tiles", `${tile.substring(0, 2)}.png`);
 };
 
 const generateHeader = ({ seat, round, turn }) =>
@@ -38,7 +46,7 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
   hand.push(draw);
 
   const composite = hand.map((x, index) => ({
-    input: path.join(__dirname, "../assets/tiles", `${x}.png`),
+    input: getImagePath(x),
     left:
       index === hand.length - 1
         ? index * TILE_WIDTH + TILE_GAP
@@ -67,14 +75,10 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
     top: 20,
   });
 
-  const indicatorImage = await sharp(
-    path.join(__dirname, "../assets/tiles", `${indicator}.png`),
-  )
+  const indicatorImage = await sharp(getImagePath(indicator))
     .resize({ width: DORA_WIDTH })
     .toBuffer();
-  const doraBack = await sharp(
-    path.join(__dirname, "../assets/tiles", `tile_back.png`),
-  )
+  const doraBack = await sharp(getImagePath("tb"))
     .resize({ width: DORA_WIDTH })
     .toBuffer();
 
@@ -107,37 +111,6 @@ const generateImage = async ({ seat, round, turn, indicator, hand, draw }) => {
     .composite(composite)
     .toFormat("png", { quality: 100 })
     .toBuffer();
-
-  // return sharp(path.join(__dirname, "../assets/wwyd_base.png")).composite(hand.map((x, i) => {
-  //   return {
-  //     input: path.join(__dirname, "../assets/tiles", `${x}.png`),
-  //     top: 74,
-  //     left: i * 80
-  //   };
-  // }).concat([
-  //   {
-  //     input: path.join(__dirname, "../assets/tiles", `${draw}.png`),
-  //     top: 74,
-  //     left: 1060
-  //   },
-  //   {
-  //     input: await sharp(path.join(__dirname, "../assets/tiles", `${indicator}.png`)).resize(35, 56).toBuffer(),
-  //     top: 7,
-  //     left: 550
-  //   },
-  //   {
-  //     input: {
-  //       text: {
-  //         text: `<span foreground="white"><b>Round:${MAPPINGS[round]} Seat:${MAPPINGS[seat]} Turn:${turn}</b></span>`,
-  //         dpi: 200,
-  //         rgba: true,
-  //         font: "monospace"
-  //       }
-  //     },
-  //     left: 20,
-  //     top: 20
-  //   }
-  // ]));
 };
 
 const generateDescription = ({ comment }, hide = false) => {
@@ -261,10 +234,32 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
     const pystyleResp = wwyd.pystyle;
     if (pystyleResp != null) {
       embeds.push(
-        new EmbedBuilder().addFields({
-          name: "Pystyle Analysis",
-          value: formatAnalysisCompact(pystyleResp, 10, hide),
-        }),
+        // new EmbedBuilder().addFields({
+        //   name: "Pystyle Analysis",
+        //   value: formatAnalysisCompactPystyle(pystyleResp, 10, hide),
+        // }),
+
+        new EmbedBuilder()
+          .setTitle("Pystyle Analysis")
+          .setDescription(formatAnalysisCompactPystyle(pystyleResp, 10, hide)),
+      );
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  try {
+    const nagaResp = wwyd.naga;
+    if (nagaResp != null) {
+      embeds.push(
+        new EmbedBuilder()
+          .setURL(nagaResp.url)
+          .setTitle("NAGA Analysis")
+          // .addFields({
+          //   name: "Naga Analysis",
+          //   value: formatAnalysisCompactNaga(nagaResp, hide),
+          // }),
+          .setDescription(formatAnalysisCompactNaga(nagaResp, hide)),
       );
     }
   } catch (err) {

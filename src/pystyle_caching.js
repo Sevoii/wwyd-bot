@@ -2,7 +2,7 @@ const wwyd = require("./assets/wwyd.json");
 const {
   convertWwydToApiFormat,
   convertResponseData,
-} = require("./wwyd/wwyd_pystyle");
+} = require("./wwyd/pystyle");
 const fs = require("fs");
 const axios = require("axios");
 // const { SocksProxyAgent } = require("socks-proxy-agent");

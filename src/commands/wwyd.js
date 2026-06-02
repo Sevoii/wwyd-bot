@@ -13,7 +13,14 @@ module.exports = {
           option
             .setName("season")
             .setDescription(
-              "Season stats that you want to fetch, default to current season",
+              "Season stats that you want to fetch, default to current season. Use 0 for total score.",
+            ),
+        )
+        .addStringOption((option) =>
+          option
+            .setName("type")
+            .setDescription(
+              "Leaderboard type that you are querying. Currently supports: score, acc",
             ),
         ),
     )
@@ -25,7 +32,7 @@ module.exports = {
           option
             .setName("season")
             .setDescription(
-              "Season stats that you want to fetch, default to current season",
+              "Season stats that you want to fetch, default to current season. Use 0 for total score.",
             ),
         )
         .addBooleanOption((option) =>
@@ -52,6 +59,7 @@ module.exports = {
           interaction.client.db,
           interaction.guildId,
           options.getNumber("season"),
+          options.getString("type")
         ),
       );
     } else if (subcommand === "score") {

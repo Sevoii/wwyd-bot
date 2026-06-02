@@ -1,6 +1,6 @@
 const { EmbedBuilder, MessageFlags } = require("discord.js");
 
-const generateLeaderboard = async (db, guildId, season) => {
+const generateLeaderboard = async (db, guildId, season, type) => {
   if (season == null) {
     season = await db.models.daily_toggle.getLatestSeason(guildId);
     if (season === -1) {
@@ -10,7 +10,12 @@ const generateLeaderboard = async (db, guildId, season) => {
     }
   }
 
-  const lb = await db.models.daily_scores.getLeaderboard(guildId, season);
+  let lb;
+  if (type === "acc") {
+    lb = await db.models.daily_scores.getLeaderboardAcc(guildId, season);
+  } else {
+    lb = await db.models.daily_scores.getLeaderboard(guildId, season);
+  }
 
   const embed = new EmbedBuilder()
     .setTitle("WWYD Leaderboard")
@@ -34,8 +39,9 @@ const generateLeaderboard = async (db, guildId, season) => {
         })
         .join("\n") + "\n",
     )
-    .setFooter({ text: `Season: ${season}` });
-
+    .setFooter({
+      text: season !== 0 ? `Season: ${season}` : "Total",
+    });
   return {
     embeds: [embed],
   };
@@ -82,7 +88,9 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
           )
           // .setDescription(`<@${discordId}>'s Score: ${score.score}`)
           .setColor("Green")
-          .setFooter({ text: `Season: ${season}` }),
+          .setFooter({
+            text: season !== 0 ? `Season: ${season}` : "Total",
+          }),
       ],
     };
 
