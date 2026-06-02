@@ -1,5 +1,7 @@
 const { Studentt } = require("distributions");
 
+const BROWSER_QL_TOKEN = process.env.BROWSER_QL_TOKEN;
+
 const pct = (f) => `${(f * 100).toFixed(2)}%`;
 const pad = (s, n) => s.toString().padStart(n, " ");
 
@@ -140,7 +142,54 @@ const formatAnalysisCompact = (data, hide = false) => {
   return blocks.join("\n");
 };
 
+const fetchScreenshot = async (url) => {
+  const numSims = new URL(url).searchParams.get("sim_ids").split(",").length;
+
+  const viewportWidth = 700 * numSims + 110;
+  const viewportHeight = 1940;
+
+  const query = `
+  mutation TakeSimulationScreenshot {
+    viewport(width: ${viewportWidth}, height: ${viewportHeight}) {
+      width
+      height
+    }
+
+    goto(url: "${url}", waitUntil: networkIdle) {
+      status
+    }
+    
+    waitForTimeout(time: 2500) {
+      time
+    }
+
+    screenshot(type: png, fullPage: true) {
+      base64
+    }
+  }
+`;
+
+  const response = await fetch(
+    `https://production-sfo.browserless.io/chromium/bql?token=${BROWSER_QL_TOKEN}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    },
+  );
+
+  const json = await response.json();
+
+  if (json.errors) {
+    return null;
+  }
+
+  const base64 = json.data.screenshot.base64;
+  return Buffer.from(base64, "base64");
+};
+
 module.exports = {
   getAnalysis,
   formatAnalysisCompact,
+  fetchScreenshot,
 };

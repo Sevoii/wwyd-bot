@@ -6,21 +6,26 @@ const {
   ButtonStyle,
   ComponentType,
   MessageFlags,
+  AttachmentBuilder,
 } = require("discord.js");
-const { getAnalysis, formatAnalysisCompact } = require("../wwyd/naga");
+const {
+  getAnalysis,
+  formatAnalysisCompact,
+  fetchScreenshot,
+} = require("../wwyd/naga");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("naga")
-    .setDescription("Formats and sends a Naga Simulation")
+    .setDescription("Formats and Sends a Naga Simulation")
     .addStringOption((option) =>
       option
         .setRequired(true)
         .setName("url")
-        .setDescription("Naga Simulation Link"),
+        .setDescription("Naga Simulation URL"),
     )
     .addAttachmentOption((option) =>
-      option.setName("image").setDescription("Naga Simulation Image"),
+      option.setName("image").setDescription("Use a custom image instead of the default screenshot"),
     ),
   async execute(interaction) {
     const url = interaction.options.getString("url");
@@ -70,6 +75,18 @@ module.exports = {
 
     if (attachment) {
       message.files = [attachment.url];
+    } else {
+      let buf = null;
+      // try 3 times to fetch screenshot data
+      for (let i = 0; i < 3; i++) {
+        buf = await fetchScreenshot(url);
+        if (buf) break;
+      }
+
+      if (buf) {
+        const file = new AttachmentBuilder(buf, { name: "naga.png" });
+        message.files = [file];
+      }
     }
 
     await interaction.editReply(message);
