@@ -18,7 +18,10 @@ const SEAT_MAPPINGS = {
 
 const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
 const { getWwyd } = require("./wwyd_gen");
-const { formatAnalysisCompact } = require("./pystyle");
+const {
+  formatAnalysisCompact: formatAnalysisCompactPystyle,
+} = require("./pystyle");
+const { formatAnalysisCompact: formatAnalysisCompactNaga } = require("./naga");
 
 const formatTile = (tile) => {
   return EMOJI_MAPPINGS[tile];
@@ -231,10 +234,32 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
     const pystyleResp = wwyd.pystyle;
     if (pystyleResp != null) {
       embeds.push(
-        new EmbedBuilder().addFields({
-          name: "Pystyle Analysis",
-          value: formatAnalysisCompact(pystyleResp, 10, hide),
-        }),
+        // new EmbedBuilder().addFields({
+        //   name: "Pystyle Analysis",
+        //   value: formatAnalysisCompactPystyle(pystyleResp, 10, hide),
+        // }),
+
+        new EmbedBuilder()
+          .setTitle("Pystyle Analysis")
+          .setDescription(formatAnalysisCompactPystyle(pystyleResp, 10, hide)),
+      );
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  try {
+    const nagaResp = wwyd.naga;
+    if (nagaResp != null) {
+      embeds.push(
+        new EmbedBuilder()
+          .setURL(nagaResp.url)
+          .setTitle("NAGA Analysis")
+          // .addFields({
+          //   name: "Naga Analysis",
+          //   value: formatAnalysisCompactNaga(nagaResp, hide),
+          // }),
+          .setDescription(formatAnalysisCompactNaga(nagaResp, hide)),
       );
     }
   } catch (err) {
