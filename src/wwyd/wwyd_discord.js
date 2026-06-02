@@ -18,7 +18,7 @@ const SEAT_MAPPINGS = {
 
 const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
 const { getWwyd } = require("./wwyd_gen");
-const { formatAnalysisCompact } = require("./wwyd_pystyle");
+const { formatAnalysisCompact } = require("./pystyle");
 
 const formatTile = (tile) => {
   return EMOJI_MAPPINGS[tile];

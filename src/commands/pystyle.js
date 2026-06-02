@@ -6,7 +6,7 @@ const {
 const {
   analyzeWWYDSituation,
   formatAnalysisCompact,
-} = require("../wwyd/wwyd_pystyle");
+} = require("../wwyd/pystyle");
 
 const parseTiles = (hand) => {
   const result = [];
