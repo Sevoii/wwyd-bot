@@ -24,7 +24,11 @@ Wwyd Config (Requires Manage-Channels Permission to use)
 Random Commands:
 
 * `/wwyd_random`: Generates a random WWYD for practice
+
+Sim Commands
+
 * `/pystyle`: Evaluates a inputted hand with PyStyle
+* `/naga (link)`: Formats a Naga Sim
 
 ## How to Use
 
