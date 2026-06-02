@@ -591,7 +591,7 @@ module.exports = {
 
     for (let row of await connection.all("SELECT * FROM main.WwydDaily")) {
       if (Number.isInteger(row.internal_id)) {
-        row.internal_id = MAPPING[row.internal_id];
+        row.internal_id = MAPPING[row.internal_id] ?? "unknown";
       }
 
       await connection.run(
