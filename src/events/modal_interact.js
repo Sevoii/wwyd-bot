@@ -10,11 +10,13 @@ const handleReportModal = async (interaction) => {
   const source = interaction.fields.getTextInputValue("source");
   const reportType = interaction.fields.getStringSelectValues("type");
   const info = interaction.fields.getTextInputValue("info");
+  const reporter = interaction.user;
 
-  const msg = `\`\`\`ansi\nSource: \u001b[1;32m${source}\u001b[0m\nReport Type: \u001b[1;32m${reportType}\u001b[0m\nInfo: \u001b[1;32m${info}\u001b[0m\`\`\``;
+  // TEMP REPORTING CODE
+
+  const msg = `\`\`\`ansi\nReporter: \u001b[1;34m${reporter.username} (${reporter.id})\u001b[0m\nSource: \u001b[1;32m${source}\u001b[0m\nReport Type: \u001b[1;32m${reportType}\u001b[0m\nInfo: \u001b[1;32m${info}\u001b[0m\`\`\``;
   console.log(msg);
 
-  // Temp until i can get gh to work
   const guild = await interaction.client.guilds.fetch(
     process.env.DISCORD_REPORT_GUILD_ID,
   );
