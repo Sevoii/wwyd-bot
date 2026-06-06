@@ -270,7 +270,14 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
     embeds,
     files: [wwydImg],
     flags: MessageFlags.Ephemeral,
-    components: [],
+    components: [
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setLabel("Report an Issue")
+          .setStyle(ButtonStyle.Danger)
+          .setCustomId(`report-${wwyd.source}`),
+      ),
+    ],
   };
 };
 
