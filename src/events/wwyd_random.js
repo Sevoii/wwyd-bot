@@ -1,5 +1,6 @@
 const { Events, MessageFlags } = require("discord.js");
 const { generateAnswerMessage } = require("../wwyd/wwyd_discord");
+const { getWwyd } = require("../wwyd/wwyd_gen");
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -15,9 +16,12 @@ module.exports = {
       return;
     }
 
+    const [_, wwydId, seed, __, ans] = buttonData;
+    const wwyd = getWwyd(wwydId, parseInt(seed));
+
     const message = await generateAnswerMessage(
-      buttonData[1],
-      buttonData[3],
+      wwyd,
+      ans,
     );
 
     try {

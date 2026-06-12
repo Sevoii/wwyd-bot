@@ -23,17 +23,19 @@ module.exports = {
       return;
     }
 
-    const wwydId = buttonData[1];
-    const correct = getWwyd(wwydId).answer.includes(buttonData[3]);
-    const isPass = buttonData[3] === "na";
+    const [_, wwydId, seed, uuid, ans] = buttonData;
+    const wwyd = getWwyd(wwydId, parseInt(seed));
+
+    const correct = wwyd.problem.answer.includes(ans);
+    const isPass = ans === "na";
     let res = 1;
 
     if (isNormalWwyd(wwydId)) {
       res = await interaction.client.db.models.daily_answers.addAnswer(
         interaction.guildId,
         interaction.member.id,
-        buttonData[2],
-        buttonData[3],
+        uuid,
+        ans,
         correct ? 1 : 0,
         isPass,
       );
@@ -56,12 +58,12 @@ module.exports = {
     }
 
     const message = await generateAnswerMessage(
-      buttonData[1],
-      buttonData[3],
+      wwyd,
+      ans,
     );
 
     if (!isPass) {
-      if (isNormalWwyd(buttonData[1])) {
+      if (isNormalWwyd(wwydId)) {
         message.embeds.push(
           new EmbedBuilder()
             .setTitle(

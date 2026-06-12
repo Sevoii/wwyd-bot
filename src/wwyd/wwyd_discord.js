@@ -9,15 +9,9 @@ const {
 const sharp = require("sharp");
 const path = require("path");
 
-const SEAT_MAPPINGS = {
-  E: "\u6771",
-  S: "\u5357",
-  W: "\u897F",
-  N: "\u5317",
-};
+const SEAT_MAPPINGS = ["\u6771", "\u5357", "\u897F", "\u5317"];
 
 const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
-const { getWwyd } = require("./wwyd_gen");
 const {
   formatAnalysisCompact: formatAnalysisCompactPystyle,
 } = require("./pystyle");
@@ -134,7 +128,7 @@ const getOptions = ({ hand, draw }) => {
     if (suitOrder[sA] !== suitOrder[sB]) {
       return suitOrder[sA] - suitOrder[sB];
     }
-    return iA - iB;
+    return (iA === 0 ? 4.5 : iA) - (iB === 0 ? 4.5 : iB);
   });
   return hand.filter((item, index) => hand.indexOf(item) === index);
 };
@@ -151,8 +145,8 @@ const STYLE_MAPPING = {
 };
 
 const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
-  const image = await generateImage(wwyd);
-  const options = getOptions(wwyd);
+  const image = await generateImage(wwyd.problem);
+  const options = getOptions(wwyd.problem);
 
   const wwydImg = new AttachmentBuilder(image, { name: "wwyd.png" });
 
@@ -169,7 +163,7 @@ const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
       new ActionRowBuilder().addComponents(
         options.slice(j, j + 5).map((x) =>
           new ButtonBuilder()
-            .setCustomId(`${label}:${wwyd.source}:${uuid}:${x}`)
+            .setCustomId(`${label}:${wwyd.source}:${wwyd.seed}:${uuid}:${x}`)
             .setLabel(x)
             // .setEmoji(EMOJI_MAPPINGS[x])
             .setStyle(STYLE_MAPPING[x[1]] ?? ButtonStyle.Primary),
@@ -181,7 +175,7 @@ const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
   actionRows.push(
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`${label}:${wwyd.source}:${uuid}:na`)
+        .setCustomId(`${label}:${wwyd.source}:${wwyd.seed}:${uuid}:na`)
         .setLabel("pass")
         .setStyle(ButtonStyle.Primary),
     ),
@@ -200,17 +194,15 @@ const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
   return message;
 };
 
-const generateAnswerMessage = async (internalId, answer, hide = false) => {
-  const wwyd = getWwyd(internalId);
-
-  const image = await generateImage(wwyd);
-  const description = generateDescription(wwyd, hide);
+const generateAnswerMessage = async (wwyd, answer, hide = false) => {
+  const image = await generateImage(wwyd.problem);
+  const description = generateDescription(wwyd.problem, hide);
 
   const wwydImg = new AttachmentBuilder(image, { name: "wwyd.png" });
 
   const embed = new EmbedBuilder()
     .setTitle(
-      `Answer: ${hide ? "||" : ""}${Array.isArray(wwyd.answer) ? wwyd.answer.map(formatTile).join(",") : formatTile(wwyd.answer)}${hide ? "||" : ""}`,
+      `Answer: ${hide ? "||" : ""}${wwyd.problem.answer.map(formatTile).join(",")}${hide ? "||" : ""}`,
     )
     .setDescription(description)
     // .setFields([
@@ -221,7 +213,11 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
     //   },
     // ])
     .setColor(
-      answer === "na" ? "Blue" : wwyd.answer.includes(answer) ? "Green" : "Red",
+      answer === "na"
+        ? "Blue"
+        : wwyd.problem.answer.includes(answer)
+          ? "Green"
+          : "Red",
     )
     .setFooter({
       text: `Source: ${wwyd.source}`,
