@@ -23,7 +23,15 @@ module.exports = {
       return;
     }
 
-    const [_, wwydId, seed, uuid, ans] = buttonData;
+    let [_, wwydId, seed, uuid, ans] = buttonData;
+
+    // to remove
+    if (ans == null) {
+      ans = uuid;
+      uuid = seed;
+      seed = 0;
+    }
+
     const wwyd = getWwyd(wwydId, parseInt(seed));
 
     const correct = wwyd.problem.answer.includes(ans);
