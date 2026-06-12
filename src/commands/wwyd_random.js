@@ -10,9 +10,8 @@ module.exports = {
     ),
   async execute(interaction) {
     const message = await generateQuestionMessage(
-      randomWwyd(),
+      randomWwyd(Math.floor(Math.random() * 6)),
       "wwyd_random",
-      Math.floor(Math.random() * 6),
       true,
     );
     await interaction.reply(message);
