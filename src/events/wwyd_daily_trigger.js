@@ -20,7 +20,7 @@ const sendWwydMessage = async (
 ) => {
   const wwyd = funny
     ? funnyWwydDaily(parseInt(guildId.substring(1, 10)))
-    : randomWwydDaily(parseInt(guildId.substring(1, 10)));
+    : randomWwydDaily(parseInt(guildId.substring(1, 10)), Math.floor(Math.random() * 6));
   const uuid = getWwydUUID(wwyd);
 
   const prevData = await client.db.models.daily_message.getPrevStats(guildId);
