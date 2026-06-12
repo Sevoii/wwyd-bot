@@ -55,6 +55,8 @@ const ALL_PERMS = [
   [0, 2, 1],
 ];
 
+const SUITS = ["Manzu", "Pinzu", "Souzu"];
+
 const getShuffledTile = (idx, seed = 0) => {
   // Don't shuffle any honor tiles (dragons are shuffleable, but unnecessary)
   if (idx >= 30) return idx;
@@ -82,9 +84,16 @@ const fixWwyd = (wwyd, seed) => {
   fixed.problem.answer = fixed.problem.answer.map(
     (x) => TILES[getShuffledTile(x, seed)],
   );
-  fixed.problem.comment = fixed.problem.comment.map((x) =>
-    typeof x === "string" ? x : x.map((y) => TILES[getShuffledTile(y, seed)]),
-  );
+  fixed.problem.comment = fixed.problem.comment.map((x) => {
+    if (x.type === "text") {
+      return x.data;
+    } else if (x.type === "suit") {
+      const permutation = ALL_PERMS[seed % 6];
+      return SUITS[permutation[x.data]];
+    } else if (x.type === "tile") {
+      return x.data.map((y) => TILES[getShuffledTile(y, seed)]);
+    }
+  });
 
   if (fixed.pystyle) {
     fixed.pystyle = fixed.pystyle.map((x) => {
@@ -165,7 +174,7 @@ const unknownWwyd = {
 
 const randomWwyd = (shuffleSeed = 0) => {
   const i = Math.floor(Math.random() * wwyd.length);
-  return fixWwyd(wwyd[38], shuffleSeed);
+  return fixWwyd(wwyd[i], shuffleSeed);
 };
 
 const randomWwydDaily = (seed, shuffleSeed = 0) => {
