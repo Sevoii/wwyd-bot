@@ -55,7 +55,7 @@ const ALL_PERMS = [
   [0, 2, 1],
 ];
 
-const SUITS = ["Manzu", "Pinzu", "Souzu"];
+const SUITS = ["manzu", "pinzu", "souzu"];
 
 const getShuffledTile = (idx, seed = 0) => {
   // Don't shuffle any honor tiles (dragons are shuffleable, but unnecessary)
