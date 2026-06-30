@@ -30,41 +30,6 @@ module.exports = class DailyToggle {
     }
   }
 
-  async toggleAutoseason(guildId) {
-    try {
-      await this.db.run(`BEGIN TRANSACTION;`);
-      const entry = await this.db.get(
-        `SELECT *
-         FROM WwydChannels
-         WHERE guild_id = @guildId`,
-        {
-          guildId,
-        },
-      );
-
-      if (entry) {
-        await this.db.run(
-          `
-            UPDATE WwydChannels
-            SET autoseason = @updated
-            WHERE guild_id = @guildId`,
-          { guildId, updated: 1 - entry.autoseason },
-        );
-
-        await this.db.run(`COMMIT;`);
-        return 1 - entry.autoseason;
-      } else {
-        await this.db.run(`ROLLBACK;`);
-        return -1;
-      }
-    } catch (err) {
-      console.error(err);
-
-      await this.db.run(`ROLLBACK;`);
-      return -1;
-    }
-  }
-
   async deleteDailyChannels(channels) {
     try {
       await this.db.run("BEGIN TRANSACTION;");
@@ -86,58 +51,68 @@ module.exports = class DailyToggle {
     }
   }
 
+  async getGuildDate(guildId) {
+    return await this.db.get(
+      `SELECT *
+       FROM WwydChannels
+       WHERE guild_id = @guildId`,
+      {
+        guildId,
+      },
+    );
+  }
+
+  async deleteGuildChannel(guildId) {
+    await this.db.run(
+      `DELETE
+       FROM WwydChannels
+       WHERE guild_id = @guildId`,
+      {
+        guildId,
+      },
+    );
+  }
+
+  async enableGuildChannel(guildId, channelId) {
+    await this.db.run(`BEGIN TRANSACTION;`);
+    try {
+      await this.db.run(
+        `
+          INSERT INTO WwydChannels (guild_id, channel_id)
+          VALUES (@guildId, @channelId)
+          ON CONFLICT(guild_id)
+            DO UPDATE SET channel_id = @channelId;
+        `,
+        { guildId, channelId },
+      );
+
+      await this.db.run(
+        `
+          INSERT INTO Season (guild_id, season, is_active)
+          VALUES (@guildId, 1, 1)
+          ON CONFLICT (guild_id, season) DO NOTHING
+        `,
+        { guildId },
+      );
+
+      await this.db.run(`COMMIT;`);
+    } catch (err) {
+      await this.db.run(`ROLLBACK;`);
+      throw err;
+    }
+  }
+
   async toggleDaily(guildId, channelId) {
     try {
-      await this.db.run(`BEGIN TRANSACTION;`);
-
-      if (
-        await this.db.get(
-          `SELECT *
-           FROM WwydChannels
-           WHERE guild_id = @guildId`,
-          {
-            guildId,
-          },
-        )
-      ) {
-        await this.db.run(
-          `DELETE
-           FROM WwydChannels
-           WHERE guild_id = @guildId`,
-          {
-            guildId,
-          },
-        );
-
-        await this.db.run(`COMMIT;`);
+      if (await this.getGuildDate(guildId)) {
+        await this.deleteGuildChannel(guildId);
         return 0;
       } else {
-        await this.db.run(
-          `
-            INSERT INTO WwydChannels (guild_id, channel_id)
-            VALUES (@guildId, @channelId)
-            ON CONFLICT(guild_id)
-              DO UPDATE SET channel_id = @channelId;
-          `,
-          { guildId, channelId },
-        );
-
-        await this.db.run(
-          `
-            INSERT INTO Season (guild_id, season, is_active)
-            VALUES (@guildId, 1, 1)
-            ON CONFLICT (guild_id, season) DO NOTHING
-          `,
-          { guildId },
-        );
-
-        await this.db.run(`COMMIT;`);
+        await this.enableGuildChannel(guildId, channelId);
         return 1;
       }
     } catch (err) {
       console.error(err);
-
-      await this.db.run(`ROLLBACK;`);
       return -1;
     }
   }
@@ -195,6 +170,60 @@ module.exports = class DailyToggle {
       );
 
       return season?.current_season ?? 1;
+    } catch (err) {
+      console.error(err);
+      return -1;
+    }
+  }
+
+  async setAutoseason(guildId, on) {
+    await this.db.run(
+      `
+        UPDATE WwydChannels
+        SET autoseason = @updated
+        WHERE guild_id = @guildId`,
+      { guildId, updated: on },
+    );
+  }
+
+  async toggleAutoseason(guildId) {
+    try {
+      const entry = await this.getGuildDate(guildId);
+
+      if (entry) {
+        const on = 1 - entry.autoseason;
+        await this.setAutoseason(guildId, on);
+        return on;
+      } else {
+        return -1;
+      }
+    } catch (err) {
+      console.error(err);
+      return -1;
+    }
+  }
+
+  async setPingoncorrect(guildId, on) {
+    await this.db.run(
+      `
+        UPDATE WwydChannels
+        SET pingoncorrect = @updated
+        WHERE guild_id = @guildId`,
+      { guildId, updated: on },
+    );
+  }
+
+  async togglePingoncorrect(guildId) {
+    try {
+      const entry = await this.getGuildDate(guildId);
+
+      if (entry) {
+        const on = 1 - entry.pingoncorrect;
+        await this.setPingoncorrect(guildId, on);
+        return on;
+      } else {
+        return -1;
+      }
     } catch (err) {
       console.error(err);
       return -1;
