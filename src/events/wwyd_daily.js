@@ -55,10 +55,7 @@ module.exports = {
       return;
     }
 
-    const message = await generateAnswerMessage(
-      buttonData[1],
-      buttonData[3],
-    );
+    const message = await generateAnswerMessage(buttonData[1], buttonData[3]);
 
     if (!isPass) {
       if (isNormalWwyd(buttonData[1])) {
@@ -72,7 +69,11 @@ module.exports = {
             .setColor(res === 1 ? "Green" : "Red"),
         );
       } else {
-        message.embeds.push(new EmbedBuilder().setTitle("Your score was not saved :c").setColor("Red"));
+        message.embeds.push(
+          new EmbedBuilder()
+            .setTitle("Your score was not saved :c")
+            .setColor("Red"),
+        );
       }
     }
 
@@ -98,17 +99,24 @@ module.exports = {
           season,
         )) ?? { streak: 0 };
 
-        let msg = `<@${interaction.member.id}> got it right!`;
+        const channelData =
+          await interaction.client.db.models.daily_toggle.getGuildDate(
+            interaction.guildId,
+          );
 
-        if (wwydId < 0 && correct) {
-          score.streak = 999;
+        if (channelData?.pingoncorrect) {
+          let msg = `<@${interaction.member.id}> got it right!`;
+
+          if (wwydId < 0 && correct) {
+            score.streak = 999;
+          }
+
+          if (score && score.streak >= 3) {
+            msg += `\n-# Answer Streak: ${score.streak} ${score.streak > 10 ? "🚀" : "🔥"}`;
+          }
+
+          await interaction.channel.send(msg);
         }
-
-        if (score && score.streak >= 3) {
-          msg += `\n-# Answer Streak: ${score.streak} ${score.streak > 10 ? "🚀" : "🔥"}`;
-        }
-
-        await interaction.channel.send(msg);
       } catch (err) {
         console.error(
           `Could not send correct answer message in ${interaction.guildId} from ${interaction.member.id}`,
