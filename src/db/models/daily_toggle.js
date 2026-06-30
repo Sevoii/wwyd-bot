@@ -91,7 +91,7 @@ module.exports = class DailyToggle {
         { guildId, channelId },
       );
 
-      if (pingoncorrect) {
+      if (pingoncorrect != null) {
         await this.db.run(
           `UPDATE WwydChannels
            SET pingoncorrect=@pingoncorrect
@@ -100,7 +100,7 @@ module.exports = class DailyToggle {
         );
       }
 
-      if (autoseason) {
+      if (autoseason != null) {
         await this.db.run(
           `UPDATE WwydChannels
            SET autoseason=@autoseason
