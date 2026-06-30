@@ -73,7 +73,12 @@ module.exports = class DailyToggle {
     );
   }
 
-  async enableGuildChannel(guildId, channelId) {
+  async enableGuildChannel(
+    guildId,
+    channelId,
+    autoseason = null,
+    pingoncorrect = null,
+  ) {
     await this.db.run(`BEGIN TRANSACTION;`);
     try {
       await this.db.run(
@@ -85,6 +90,24 @@ module.exports = class DailyToggle {
         `,
         { guildId, channelId },
       );
+
+      if (pingoncorrect) {
+        await this.db.run(
+          `UPDATE WwydChannels
+           SET pingoncorrect=@pingoncorrect
+           WHERE guild_id = @guildId`,
+          { guildId, pingoncorrect },
+        );
+      }
+
+      if (autoseason) {
+        await this.db.run(
+          `UPDATE WwydChannels
+           SET autoseason=@autoseason
+           WHERE guild_id = @guildId`,
+          { guildId, autoseason },
+        );
+      }
 
       await this.db.run(
         `
