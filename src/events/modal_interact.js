@@ -29,6 +29,37 @@ const handleReportModal = async (interaction) => {
   }
 };
 
+const handleConfigModal = async (interaction) => {
+  const channel =
+    interaction.fields.getSelectedChannels("wwydchannel")?.values().next()
+      .value ?? null;
+  const autoseason = interaction.fields.getCheckbox("autoseason") | 0;
+  const pingoncorrect = interaction.fields.getCheckbox("pingoncorrect") | 0;
+  const forcewwyd = interaction.fields.getCheckbox("forcewwyd");
+
+  if (channel) {
+    await interaction.client.db.models.daily_toggle.enableGuildChannel(
+      interaction.guildId,
+      channel.id,
+      autoseason,
+      pingoncorrect,
+    );
+
+    if (forcewwyd) {
+      interaction.client.emit("WWYD_Daily", interaction.client, channel);
+    }
+  } else {
+    await interaction.client.db.models.daily_toggle.deleteGuildChannel(
+      interaction.guildId,
+    );
+  }
+
+  await interaction.reply({
+    content: `Received Config request: channel: ${channel}, AutoSeason: ${!!autoseason}, Ping On Correct: ${!!pingoncorrect}`,
+    ephemeral: true,
+  });
+};
+
 module.exports = {
   name: Events.InteractionCreate,
   once: false,
@@ -36,7 +67,9 @@ module.exports = {
     if (!interaction.isModalSubmit()) return;
 
     if (interaction.customId === "reportModal") {
-      handleReportModal(interaction);
+      await handleReportModal(interaction);
+    } else if (interaction.customId === "configMenu") {
+      await handleConfigModal(interaction);
     }
   },
 };

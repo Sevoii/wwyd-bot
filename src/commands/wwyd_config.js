@@ -3,6 +3,14 @@ const {
   InteractionContextType,
   PermissionFlagsBits,
   MessageFlags,
+  ModalBuilder,
+  LabelBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ChannelType,
+  ActionRowBuilder,
+  ChannelSelectMenuBuilder,
+  CheckboxBuilder,
 } = require("discord.js");
 
 module.exports = {
@@ -26,6 +34,9 @@ module.exports = {
       subcommand
         .setName("auto_season")
         .setDescription("Toggles autoseason for the server"),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand.setName("menu").setDescription("WWYD Menu Config"),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .setContexts(InteractionContextType.Guild),
@@ -90,6 +101,65 @@ module.exports = {
       } else {
         await interaction.reply("Failed to set new season, try again");
       }
+    } else if (subcommand === "menu") {
+      const channelData =
+        await interaction.client.db.models.daily_toggle.getGuildDate(
+          interaction.guildId,
+        );
+
+      const modal = new ModalBuilder()
+        .setCustomId("configMenu")
+        .setTitle("Configuration");
+
+      const wwydChannelBuilder = new ChannelSelectMenuBuilder()
+        .setCustomId("wwydchannel")
+        .setMinValues(0)
+        .setMaxValues(1)
+        .setRequired(false)
+        .setChannelTypes([ChannelType.GuildText]);
+
+      if (channelData) {
+        wwydChannelBuilder.setDefaultChannels(channelData?.channel_id);
+      }
+
+      const wwydChannel = new LabelBuilder()
+        .setLabel("WWYD Channel")
+        .setDescription(
+          "Select the channel you want to send daily WWYD's in. Deselect if you want to turn it off.",
+        )
+        .setChannelSelectMenuComponent(wwydChannelBuilder);
+
+      const autoSeason = new LabelBuilder()
+        .setLabel("AutoSeason")
+        .setDescription("AutoSeason resets the season every month.")
+        .setCheckboxComponent(
+          new CheckboxBuilder()
+            .setCustomId("autoseason")
+            .setDefault(!!(channelData?.autoseason ?? false)),
+        );
+
+      const pingoncorrect = new LabelBuilder()
+        .setLabel("Ping on Correct")
+        .setDescription("Pings the answerer if they answered correct.")
+        .setCheckboxComponent(
+          new CheckboxBuilder()
+            .setCustomId("pingoncorrect")
+            .setDefault(!!(channelData?.pingoncorrect ?? true)),
+        );
+
+      const forceSendWwwyd = new LabelBuilder()
+        .setLabel("Force Send a WWYD")
+        .setDescription("Sends a WWYD to the selected channel")
+        .setCheckboxComponent(new CheckboxBuilder().setCustomId("forcewwyd"));
+
+      modal.addLabelComponents(
+        wwydChannel,
+        autoSeason,
+        pingoncorrect,
+        forceSendWwwyd,
+      );
+
+      await interaction.showModal(modal);
     }
   },
 };
