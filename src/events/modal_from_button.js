@@ -15,55 +15,56 @@ const createReportModal = async (buttonId) => {
     .setCustomId("reportModal")
     .setTitle("Report an Issue");
 
-  const sourceInput = new TextInputBuilder()
-    .setCustomId("source")
-    .setStyle(TextInputStyle.Short)
-    .setValue(source);
-
   const wwydSourceLabel = new LabelBuilder()
     .setLabel("WWYD Source:")
-    .setTextInputComponent(sourceInput);
-
-  const reportType = new StringSelectMenuBuilder()
-    .setCustomId("type")
-    .setPlaceholder("Make a selection")
-    .setRequired(true)
-    .addOptions(
-      new StringSelectMenuOptionBuilder()
-        .setLabel("Description Issues")
-        .setDescription("There is some problem in the problem description")
-        .setValue("description"),
-      new StringSelectMenuOptionBuilder()
-        .setLabel("Incorrect Answer")
-        .setDescription("The answer makes no sense and needs to be checked")
-        .setValue("answer"),
-      new StringSelectMenuOptionBuilder()
-        .setLabel("Misc")
-        .setDescription("Miscellaneous issues")
-        .setValue("misc"),
-      new StringSelectMenuOptionBuilder()
-        .setLabel("My answer was wrong!")
-        .setDescription(
-          "Use this if there's no issues but you want to complain to me :>",
-        )
-        .setValue("mad"),
+    .setTextInputComponent(
+      new TextInputBuilder()
+        .setCustomId("source")
+        .setStyle(TextInputStyle.Short)
+        .setValue(source),
     );
 
   const wwydReportTypeLabel = new LabelBuilder()
     .setLabel("Why did you report an issue?")
-    .setStringSelectMenuComponent(reportType);
-
-  const info = new TextInputBuilder()
-    .setCustomId("info")
-    .setStyle(TextInputStyle.Paragraph)
-    .setPlaceholder("Add any extra information you'd like here")
-    .setRequired(false)
-    .setMaxLength(1024);
+    .setStringSelectMenuComponent(
+      new StringSelectMenuBuilder()
+        .setCustomId("type")
+        .setPlaceholder("Make a selection")
+        .setRequired(true)
+        .addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setLabel("My answer was wrong!")
+            .setDescription(
+              "Use this if the correct solution had a reasonable explanation but you want to complain",
+            )
+            .setValue("mad"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Description Issues")
+            .setDescription("There is some problem in the problem description")
+            .setValue("description"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Incorrect Answer")
+            .setDescription("The answer makes no sense and needs to be checked")
+            .setValue("answer"),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Misc")
+            .setDescription("Miscellaneous issues")
+            .setValue("misc"),
+        ),
+    );
 
   const infoLabel = new LabelBuilder()
     .setLabel("Extra Info")
-    .setTextInputComponent(info);
+    .setTextInputComponent(
+      new TextInputBuilder()
+        .setCustomId("info")
+        .setStyle(TextInputStyle.Paragraph)
+        .setPlaceholder("Add any extra information you'd like here")
+        .setRequired(false)
+        .setMaxLength(1024),
+    );
 
+  // I think it looks ugly if we put it all in the addLabelComponents
   modal.addLabelComponents(wwydSourceLabel, wwydReportTypeLabel, infoLabel);
 
   return modal;
