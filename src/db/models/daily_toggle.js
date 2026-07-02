@@ -78,7 +78,7 @@ module.exports = class DailyToggle {
     channelId,
     autoseason = null,
     pingoncorrect = null,
-    dailyping = null,
+    dailyping = 0,  // generic default should never be used
   ) {
     await this.db.run(`BEGIN TRANSACTION;`);
     try {
@@ -110,7 +110,7 @@ module.exports = class DailyToggle {
         );
       }
 
-      if (dailyping != null) {
+      if (dailyping !== 0) {
         await this.db.run(
           `UPDATE WwydChannels
            SET dailyping=@dailyping

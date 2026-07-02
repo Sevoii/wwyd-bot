@@ -150,7 +150,7 @@ const STYLE_MAPPING = {
   s: ButtonStyle.Success,
 };
 
-const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
+const generateQuestionMessage = async (wwyd, label, ephemeral = false, ping = null) => {
   const image = await generateImage(wwyd);
   const options = getOptions(wwyd);
 
@@ -195,6 +195,10 @@ const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
 
   if (ephemeral) {
     message.flags = MessageFlags.Ephemeral;
+  }
+
+  if (ping) {
+    message.content = `<@&${ping}>`
   }
 
   return message;

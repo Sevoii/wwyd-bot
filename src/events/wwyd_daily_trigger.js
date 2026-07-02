@@ -86,7 +86,7 @@ const sendMessage = async (client, channel, channelData, wwyd) => {
   if (guildId == null) return;
 
   const uuid = getWwydUUID(wwyd);
-  const message = await generateQuestionMessage(wwyd, "wwyd_daily");
+  const message = await generateQuestionMessage(wwyd, "wwyd_daily", false, channelData?.dailyping);
 
   for (let k = 0; k < 3; k++) {
     try {

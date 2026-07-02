@@ -5,7 +5,7 @@ with stat tracking, and offers members an option to do practice WWYDs.
 
 ## Invite
 
-[Discord OAuth Invite Link](https://discord.com/oauth2/authorize?client_id=1434270517128466574&permissions=68608&integration_type=0&scope=bot+applications.commands)
+[Discord OAuth Invite Link](https://discord.com/oauth2/authorize?client_id=1434270517128466574)
 
 ## Commands
 
