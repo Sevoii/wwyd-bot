@@ -51,7 +51,7 @@ module.exports = class DailyToggle {
     }
   }
 
-  async getGuildDate(guildId) {
+  async getGuildData(guildId) {
     return await this.db.get(
       `SELECT *
        FROM WwydChannels
@@ -78,6 +78,7 @@ module.exports = class DailyToggle {
     channelId,
     autoseason = null,
     pingoncorrect = null,
+    dailyping = 0,  // generic default should never be used
   ) {
     await this.db.run(`BEGIN TRANSACTION;`);
     try {
@@ -109,6 +110,15 @@ module.exports = class DailyToggle {
         );
       }
 
+      if (dailyping !== 0) {
+        await this.db.run(
+          `UPDATE WwydChannels
+           SET dailyping=@dailyping
+           WHERE guild_id = @guildId`,
+          { guildId, dailyping },
+        );
+      }
+
       await this.db.run(
         `
           INSERT INTO Season (guild_id, season, is_active)
@@ -127,7 +137,7 @@ module.exports = class DailyToggle {
 
   async toggleDaily(guildId, channelId) {
     try {
-      if (await this.getGuildDate(guildId)) {
+      if (await this.getGuildData(guildId)) {
         await this.deleteGuildChannel(guildId);
         return 0;
       } else {
@@ -150,7 +160,7 @@ module.exports = class DailyToggle {
     }
   }
 
-  async stageNewSeason(guildId) {
+  async stageNewSeason(guildId, active = 0) {
     try {
       await this.db.run(`BEGIN TRANSACTION;`);
 
@@ -164,11 +174,11 @@ module.exports = class DailyToggle {
 
       await this.db.run(
         `
-          INSERT INTO Season (guild_id, season)
-          VALUES (@guildId, @season)
+          INSERT INTO Season (guild_id, season, is_active)
+          VALUES (@guildId, @season, @active)
           ON CONFLICT (guild_id, season) DO NOTHING;
         `,
-        { guildId, season: season + 1 },
+        { guildId, season: season + 1, active },
       );
 
       await this.db.run(`COMMIT;`);
@@ -211,7 +221,7 @@ module.exports = class DailyToggle {
 
   async toggleAutoseason(guildId) {
     try {
-      const entry = await this.getGuildDate(guildId);
+      const entry = await this.getGuildData(guildId);
 
       if (entry) {
         const on = 1 - entry.autoseason;
@@ -238,7 +248,7 @@ module.exports = class DailyToggle {
 
   async togglePingoncorrect(guildId) {
     try {
-      const entry = await this.getGuildDate(guildId);
+      const entry = await this.getGuildData(guildId);
 
       if (entry) {
         const on = 1 - entry.pingoncorrect;
@@ -251,5 +261,15 @@ module.exports = class DailyToggle {
       console.error(err);
       return -1;
     }
+  }
+
+  async setDailyping(guildId, on) {
+    await this.db.run(
+      `
+        UPDATE WwydChannels
+        SET dailyping = @updated
+        WHERE guild_id = @guildId`,
+      { guildId, updated: on },
+    );
   }
 };

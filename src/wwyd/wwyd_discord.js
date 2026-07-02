@@ -150,7 +150,7 @@ const STYLE_MAPPING = {
   s: ButtonStyle.Success,
 };
 
-const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
+const generateQuestionMessage = async (wwyd, label, ephemeral = false, ping = null) => {
   const image = await generateImage(wwyd);
   const options = getOptions(wwyd);
 
@@ -195,6 +195,10 @@ const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
 
   if (ephemeral) {
     message.flags = MessageFlags.Ephemeral;
+  }
+
+  if (ping) {
+    message.content = `<@&${ping}>`
   }
 
   return message;
@@ -281,6 +285,24 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
   };
 };
 
+const generateRecapEmbed = (successes, attempts, answerCounts) => {
+  return {
+    embeds: [
+      new EmbedBuilder()
+        .setTitle("WWYD Daily Recap")
+        .setDescription(
+          `Successes: ${successes} - Total: ${attempts} - Success Rate: ${Math.floor((successes / attempts) * 100)}%\nGuess Distribution: ${Object.entries(
+            answerCounts,
+          )
+            .sort(([keyA], [keyB]) => keyB.localeCompare(keyA)) // sort keys Z → A
+            .map(([key, value]) => `${key}:${value}`)
+            .join(", ")}`,
+        )
+        .setColor("#d9a441"),
+    ],
+  };
+};
+
 module.exports = {
   generateImage,
   generateHeader,
@@ -289,4 +311,5 @@ module.exports = {
   generateQuestionMessage,
   generateAnswerMessage,
   getWwydUUID,
+  generateRecapEmbed,
 };

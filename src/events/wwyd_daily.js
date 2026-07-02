@@ -100,7 +100,7 @@ module.exports = {
         )) ?? { streak: 0 };
 
         const channelData =
-          await interaction.client.db.models.daily_toggle.getGuildDate(
+          await interaction.client.db.models.daily_toggle.getGuildData(
             interaction.guildId,
           );
 

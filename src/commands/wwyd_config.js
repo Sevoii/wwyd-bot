@@ -10,6 +10,7 @@ const {
   ChannelType,
   ActionRowBuilder,
   ChannelSelectMenuBuilder,
+  RoleSelectMenuBuilder,
   CheckboxBuilder,
 } = require("discord.js");
 
@@ -103,7 +104,7 @@ module.exports = {
       }
     } else if (subcommand === "menu") {
       const channelData =
-        await interaction.client.db.models.daily_toggle.getGuildDate(
+        await interaction.client.db.models.daily_toggle.getGuildData(
           interaction.guildId,
         );
 
@@ -129,9 +130,29 @@ module.exports = {
         )
         .setChannelSelectMenuComponent(wwydChannelBuilder);
 
+      const wwydPingBuilder = new RoleSelectMenuBuilder()
+        .setCustomId("wwydping")
+        .setMinValues(0)
+        .setMaxValues(1)
+        .setRequired(false);
+
+      if (
+        channelData?.dailyping &&
+        (await interaction.guild.roles.cache.get(channelData.dailyping))
+      ) {
+        wwydPingBuilder.setDefaultRoles(channelData.dailyping);
+      }
+
+      const wwydPing = new LabelBuilder()
+        .setLabel("Daily Ping")
+        .setDescription(
+          "Select a role to ping when the Daily WWYD is sent out.",
+        )
+        .setRoleSelectMenuComponent(wwydPingBuilder);
+
       const autoSeason = new LabelBuilder()
-        .setLabel("AutoSeason")
-        .setDescription("AutoSeason resets the season every month.")
+        .setLabel("Auto Season")
+        .setDescription("Automatically resets the season every month.")
         .setCheckboxComponent(
           new CheckboxBuilder()
             .setCustomId("autoseason")
@@ -154,6 +175,7 @@ module.exports = {
 
       modal.addLabelComponents(
         wwydChannel,
+        wwydPing,
         autoSeason,
         pingoncorrect,
         forceSendWwwyd,

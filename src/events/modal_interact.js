@@ -36,6 +36,9 @@ const handleConfigModal = async (interaction) => {
   const autoseason = interaction.fields.getCheckbox("autoseason") | 0;
   const pingoncorrect = interaction.fields.getCheckbox("pingoncorrect") | 0;
   const forcewwyd = interaction.fields.getCheckbox("forcewwyd");
+  const dailyping =
+    interaction.fields.getSelectedRoles("wwydping")?.values().next().value.id ??
+    null;
 
   if (channel) {
     await interaction.client.db.models.daily_toggle.enableGuildChannel(
@@ -43,6 +46,7 @@ const handleConfigModal = async (interaction) => {
       channel.id,
       autoseason,
       pingoncorrect,
+      dailyping,
     );
 
     if (forcewwyd) {
@@ -54,8 +58,13 @@ const handleConfigModal = async (interaction) => {
     );
   }
 
+  let msg = `Received Config request: channel: ${channel}, role: <@&${dailyping}> AutoSeason: ${!!autoseason}, Ping On Correct: ${!!pingoncorrect}`;
+  if (dailyping != null) {
+    msg += "\n**Make sure to either make the role mentionable to everyone or give the bot `Mention @everyone, @here, and All Roles` permission.**";
+  }
+  
   await interaction.reply({
-    content: `Received Config request: channel: ${channel}, AutoSeason: ${!!autoseason}, Ping On Correct: ${!!pingoncorrect}`,
+    content: msg,
     ephemeral: true,
   });
 };
