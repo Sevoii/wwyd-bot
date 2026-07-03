@@ -33,12 +33,15 @@ const handleConfigModal = async (interaction) => {
   const channel =
     interaction.fields.getSelectedChannels("wwydchannel")?.values().next()
       .value ?? null;
-  const autoseason = interaction.fields.getCheckbox("autoseason") | 0;
-  const pingoncorrect = interaction.fields.getCheckbox("pingoncorrect") | 0;
-  const forcewwyd = interaction.fields.getCheckbox("forcewwyd");
   const dailyping =
     interaction.fields.getSelectedRoles("wwydping")?.values().next().value.id ??
     null;
+
+  const toggles = interaction.fields.getCheckboxGroup("toggleable");
+  const autoseason = toggles.includes("autoseason") | 0;
+  const pingoncorrect = toggles.includes("pingoncorrect") | 0;
+  const dailyleaderboard = toggles.includes("dailyleaderboard") | 0;
+  const forcewwyd = toggles.includes("forcewwyd");
 
   if (channel) {
     await interaction.client.db.models.daily_toggle.enableGuildChannel(
@@ -47,6 +50,7 @@ const handleConfigModal = async (interaction) => {
       autoseason,
       pingoncorrect,
       dailyping,
+      dailyleaderboard
     );
 
     if (forcewwyd) {
@@ -58,7 +62,7 @@ const handleConfigModal = async (interaction) => {
     );
   }
 
-  let msg = `Received Config request: channel: ${channel}, role: <@&${dailyping}> AutoSeason: ${!!autoseason}, Ping On Correct: ${!!pingoncorrect}`;
+  let msg = `Received Config request: channel: ${channel}, role: <@&${dailyping}> AutoSeason: ${!!autoseason}, Ping On Correct: ${!!pingoncorrect}, Daily Leaderboard: ${dailyleaderboard}`;
   if (dailyping != null) {
     msg += "\n**Make sure to either make the role mentionable to everyone or give the bot `Mention @everyone, @here, and All Roles` permission.**";
   }
