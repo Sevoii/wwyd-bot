@@ -12,6 +12,7 @@ const {
   ChannelSelectMenuBuilder,
   RoleSelectMenuBuilder,
   CheckboxBuilder,
+  CheckboxGroupBuilder,
 } = require("discord.js");
 
 module.exports = {
@@ -150,36 +151,42 @@ module.exports = {
         )
         .setRoleSelectMenuComponent(wwydPingBuilder);
 
-      const autoSeason = new LabelBuilder()
-        .setLabel("Auto Season")
-        .setDescription("Automatically resets the season every month.")
-        .setCheckboxComponent(
-          new CheckboxBuilder()
-            .setCustomId("autoseason")
-            .setDefault(!!(channelData?.autoseason ?? false)),
-        );
+      const checkboxBuilder = new CheckboxGroupBuilder()
+        .setCustomId("toggleable")
+        .setOptions([
+          {
+            label: "Auto Season",
+            description:
+              "Automatically resets the season at the start of every month.",
+            value: "autoseason",
+            default: !!(channelData?.autoseason ?? false),
+          },
+          {
+            label: "Ping on Correct",
+            description: "Pings the answerer if they answered correct.",
+            value: "pingoncorrect",
+            default: !!(channelData?.pingoncorrect ?? true),
+          },
+          {
+            label: "Daily Leaderboard",
+            description: "Sends a daily leaderboard with the new wwyd.",
+            value: "dailyleaderboard",
+            default: !!(channelData?.dailyleaderboard ?? false),
+          },
+          {
+            label: "Force Send a WWYD",
+            description: "Sends a WWYD to the selected channel.",
+            value: "forcewwyd",
+            default: false,
+          },
+        ])
+        .setRequired(false);
 
-      const pingoncorrect = new LabelBuilder()
-        .setLabel("Ping on Correct")
-        .setDescription("Pings the answerer if they answered correct.")
-        .setCheckboxComponent(
-          new CheckboxBuilder()
-            .setCustomId("pingoncorrect")
-            .setDefault(!!(channelData?.pingoncorrect ?? true)),
-        );
+      const checkboxLabel = new LabelBuilder()
+        .setLabel("Toggleable Features")
+        .setCheckboxGroupComponent(checkboxBuilder);
 
-      const forceSendWwwyd = new LabelBuilder()
-        .setLabel("Force Send a WWYD")
-        .setDescription("Sends a WWYD to the selected channel")
-        .setCheckboxComponent(new CheckboxBuilder().setCustomId("forcewwyd"));
-
-      modal.addLabelComponents(
-        wwydChannel,
-        wwydPing,
-        autoSeason,
-        pingoncorrect,
-        forceSendWwwyd,
-      );
+      modal.addLabelComponents(wwydChannel, wwydPing, checkboxLabel);
 
       await interaction.showModal(modal);
     }

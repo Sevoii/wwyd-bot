@@ -9,7 +9,6 @@ const {
   generateRecapEmbed,
   getWwydUUID,
 } = require("../wwyd/wwyd_discord");
-const { EmbedBuilder } = require("discord.js");
 const { generateLeaderboard } = require("../wwyd/wwyd_lb");
 
 // Split this into distinct stages:
@@ -18,7 +17,7 @@ const { generateLeaderboard } = require("../wwyd/wwyd_lb");
 //   3. Stage & Commit the Seasons
 //   4. Send out a message (wwyd, daily ping, new season alert?)
 
-const editPrevWWYD = async (client, channel, channelData) => {
+const editPrevWWYD = async (client, channel) => {
   const guildId = channel.guildId;
   if (guildId == null) return;
   const prevData = await client.db.models.daily_message.getPrevStats(guildId);
@@ -75,18 +74,28 @@ const editPrevWWYD = async (client, channel, channelData) => {
   }
 };
 
-const sendLeaderboard = async (client, channel, channelData) => {};
+const sendLeaderboard = async (client, channel) => {
+  const leaderboard = await  generateLeaderboard(client.db, channel.guildId);
+  try {
+    await channel.send(leaderboard);
+  } catch (err) {
+    console.error(
+      `Tried to send leaderboard but failed`,
+      err,
+    );
+  }
+};
 
-const stageAndCommitSeason = async (client, channel, channelData) => {
+const stageAndCommitSeason = async (client, channel) => {
   await client.db.models.daily_toggle.stageNewSeason(channel.guildId, 1);
 };
 
-const sendMessage = async (client, channel, channelData, wwyd) => {
+const sendMessage = async (client, channel, wwyd, dailyping) => {
   const guildId = channel.guildId;
   if (guildId == null) return;
 
   const uuid = getWwydUUID(wwyd);
-  const message = await generateQuestionMessage(wwyd, "wwyd_daily", false, channelData?.dailyping);
+  const message = await generateQuestionMessage(wwyd, "wwyd_daily", false, dailyping);
 
   for (let k = 0; k < 3; k++) {
     try {
@@ -121,15 +130,15 @@ const sendDailyWwyd = async (
   shouldAutoseason = false,
 ) => {
   if (!funny) {
-    await editPrevWWYD(client, channel, channelData);
+    await editPrevWWYD(client, channel);
   }
 
   if (channelData?.dailyleaderboard) {
-    await sendLeaderboard(client, channel, channelData);
+    await sendLeaderboard(client, channel);
   }
 
   if (shouldAutoseason) {
-    await stageAndCommitSeason(client, channel, channelData);
+    await stageAndCommitSeason(client, channel);
   }
 
   const guildId = channel.guildId;
@@ -138,7 +147,7 @@ const sendDailyWwyd = async (
     ? funnyWwydDaily(parseInt(guildId.substring(1, 10)))
     : randomWwydDaily(parseInt(guildId.substring(1, 10)));
 
-  return await sendMessage(client, channel, channelData, wwyd);
+  return await sendMessage(client, channel, wwyd, channelData?.dailyping);
 };
 
 module.exports = {

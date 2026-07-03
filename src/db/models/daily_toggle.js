@@ -79,45 +79,29 @@ module.exports = class DailyToggle {
     autoseason = null,
     pingoncorrect = null,
     dailyping = 0,  // generic default should never be used
+    dailyleaderboard = null
   ) {
     await this.db.run(`BEGIN TRANSACTION;`);
     try {
       await this.db.run(
         `
-          INSERT INTO WwydChannels (guild_id, channel_id)
-          VALUES (@guildId, @channelId)
-          ON CONFLICT(guild_id)
-            DO UPDATE SET channel_id = @channelId;
+          INSERT INTO WwydChannels (guild_id, channel_id, pingoncorrect, autoseason, dailyleaderboard, dailyping)
+          VALUES (@guildId, @channelId, @pingoncorrect, @autoseason, @dailyleaderboard, @dailyping)
+          ON CONFLICT(guild_id) DO UPDATE SET channel_id       = @channelId,
+                                              pingoncorrect    = COALESCE(@pingoncorrect, pingoncorrect),
+                                              autoseason       = COALESCE(@autoseason, autoseason),
+                                              dailyleaderboard = COALESCE(@dailyleaderboard, dailyleaderboard),
+                                              dailyping        = CASE WHEN @dailyping = 0 THEN dailyping ELSE @dailyping END
         `,
-        { guildId, channelId },
+        {
+          guildId,
+          channelId,
+          pingoncorrect,
+          autoseason,
+          dailyleaderboard,
+          dailyping,
+        },
       );
-
-      if (pingoncorrect != null) {
-        await this.db.run(
-          `UPDATE WwydChannels
-           SET pingoncorrect=@pingoncorrect
-           WHERE guild_id = @guildId`,
-          { guildId, pingoncorrect },
-        );
-      }
-
-      if (autoseason != null) {
-        await this.db.run(
-          `UPDATE WwydChannels
-           SET autoseason=@autoseason
-           WHERE guild_id = @guildId`,
-          { guildId, autoseason },
-        );
-      }
-
-      if (dailyping !== 0) {
-        await this.db.run(
-          `UPDATE WwydChannels
-           SET dailyping=@dailyping
-           WHERE guild_id = @guildId`,
-          { guildId, dailyping },
-        );
-      }
 
       await this.db.run(
         `
@@ -268,6 +252,16 @@ module.exports = class DailyToggle {
       `
         UPDATE WwydChannels
         SET dailyping = @updated
+        WHERE guild_id = @guildId`,
+      { guildId, updated: on },
+    );
+  }
+
+  async setDailyLeaderboard(guildId, on) {
+    await this.db.run(
+      `
+        UPDATE WwydChannels
+        SET dailyleaderboard = @updated
         WHERE guild_id = @guildId`,
       { guildId, updated: on },
     );
