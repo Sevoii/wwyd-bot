@@ -9,7 +9,12 @@ const {
 const sharp = require("sharp");
 const path = require("path");
 
-const SEAT_MAPPINGS = ["\u6771", "\u5357", "\u897F", "\u5317"];
+const SEAT_MAPPINGS = {
+  E: "\u6771",
+  S: "\u5357",
+  W: "\u897F",
+  N: "\u5317",
+};
 
 const EMOJI_MAPPINGS = require("../assets/mjs_emoji_mappings.json");
 const {
@@ -144,7 +149,7 @@ const STYLE_MAPPING = {
   s: ButtonStyle.Success,
 };
 
-const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
+const generateQuestionMessage = async (wwyd, label, ephemeral = false, ping = null) => {
   const image = await generateImage(wwyd.problem);
   const options = getOptions(wwyd.problem);
 
@@ -189,6 +194,10 @@ const generateQuestionMessage = async (wwyd, label, ephemeral = false) => {
 
   if (ephemeral) {
     message.flags = MessageFlags.Ephemeral;
+  }
+
+  if (ping) {
+    message.content = `<@&${ping}>`
   }
 
   return message;
@@ -277,6 +286,24 @@ const generateAnswerMessage = async (wwyd, answer, hide = false) => {
   };
 };
 
+const generateRecapEmbed = (successes, attempts, answerCounts) => {
+  return {
+    embeds: [
+      new EmbedBuilder()
+        .setTitle("WWYD Daily Recap")
+        .setDescription(
+          `Successes: ${successes} - Total: ${attempts} - Success Rate: ${Math.floor((successes / attempts) * 100)}%\nGuess Distribution: ${Object.entries(
+            answerCounts,
+          )
+            .sort(([keyA], [keyB]) => keyB.localeCompare(keyA)) // sort keys Z → A
+            .map(([key, value]) => `${key}:${value}`)
+            .join(", ")}`,
+        )
+        .setColor("#d9a441"),
+    ],
+  };
+};
+
 module.exports = {
   generateImage,
   generateHeader,
@@ -285,4 +312,5 @@ module.exports = {
   generateQuestionMessage,
   generateAnswerMessage,
   getWwydUUID,
+  generateRecapEmbed,
 };

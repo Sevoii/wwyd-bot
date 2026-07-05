@@ -1,16 +1,21 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { generateQuestionMessage } = require("../wwyd/wwyd_discord");
-const { randomWwyd } = require("../wwyd/wwyd_gen");
+const { randomWwyd, getWwyd } = require("../wwyd/wwyd_gen");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("wwyd_random")
     .setDescription(
       "Generates a random WWYD that does not count towards the leaderboard",
+    )
+    .addStringOption((option) =>
+      option.setName("problemid").setDescription("WWYD Problem Source").setRequired(false),
     ),
   async execute(interaction) {
+    const problemId = interaction.options.getString("problemid");
+
     const message = await generateQuestionMessage(
-      randomWwyd(Math.floor(Math.random() * 6)),
+      problemId == null ? randomWwyd(Math.floor(Math.random() * 6)) : getWwyd(problemId),
       "wwyd_random",
       true,
     );

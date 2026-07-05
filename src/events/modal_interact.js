@@ -29,6 +29,50 @@ const handleReportModal = async (interaction) => {
   }
 };
 
+const handleConfigModal = async (interaction) => {
+  const channel =
+    interaction.fields.getSelectedChannels("wwydchannel")?.values().next()
+      .value ?? null;
+  const dailyping =
+    interaction.fields.getSelectedRoles("wwydping")?.values().next().value.id ??
+    null;
+
+  const toggles = interaction.fields.getCheckboxGroup("toggleable");
+  const autoseason = toggles.includes("autoseason") | 0;
+  const pingoncorrect = toggles.includes("pingoncorrect") | 0;
+  const dailyleaderboard = toggles.includes("dailyleaderboard") | 0;
+  const forcewwyd = toggles.includes("forcewwyd");
+
+  if (channel) {
+    await interaction.client.db.models.daily_toggle.enableGuildChannel(
+      interaction.guildId,
+      channel.id,
+      autoseason,
+      pingoncorrect,
+      dailyping,
+      dailyleaderboard
+    );
+
+    if (forcewwyd) {
+      interaction.client.emit("WWYD_Daily", interaction.client, channel);
+    }
+  } else {
+    await interaction.client.db.models.daily_toggle.deleteGuildChannel(
+      interaction.guildId,
+    );
+  }
+
+  let msg = `Received Config request: channel: ${channel}, role: <@&${dailyping}> AutoSeason: ${!!autoseason}, Ping On Correct: ${!!pingoncorrect}, Daily Leaderboard: ${dailyleaderboard}`;
+  if (dailyping != null) {
+    msg += "\n**Make sure to either make the role mentionable to everyone or give the bot `Mention @everyone, @here, and All Roles` permission.**";
+  }
+  
+  await interaction.reply({
+    content: msg,
+    ephemeral: true,
+  });
+};
+
 module.exports = {
   name: Events.InteractionCreate,
   once: false,
@@ -36,7 +80,9 @@ module.exports = {
     if (!interaction.isModalSubmit()) return;
 
     if (interaction.customId === "reportModal") {
-      handleReportModal(interaction);
+      await handleReportModal(interaction);
+    } else if (interaction.customId === "configMenu") {
+      await handleConfigModal(interaction);
     }
   },
 };

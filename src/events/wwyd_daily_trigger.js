@@ -6,85 +6,96 @@ const {
 const {
   generateQuestionMessage,
   generateAnswerMessage,
+  generateRecapEmbed,
   getWwydUUID,
 } = require("../wwyd/wwyd_discord");
-const { EmbedBuilder } = require("discord.js");
 const { generateLeaderboard } = require("../wwyd/wwyd_lb");
 
-const sendWwydMessage = async (
-  client,
-  guildId,
-  channel,
-  funny = false,
-  showLeaderboard = false,
-) => {
-  const wwyd = funny
-    ? funnyWwydDaily(parseInt(guildId.substring(1, 10)))
-    : randomWwydDaily(parseInt(guildId.substring(1, 10)), Math.floor(Math.random() * 6));
-  const uuid = getWwydUUID(wwyd);
+// Split this into distinct stages:
+//   1. Edit Old Messages
+//   2. Send Leaderboards Out
+//   3. Stage & Commit the Seasons
+//   4. Send out a message (wwyd, daily ping, new season alert?)
 
+const editPrevWWYD = async (client, channel) => {
+  const guildId = channel.guildId;
+  if (guildId == null) return;
   const prevData = await client.db.models.daily_message.getPrevStats(guildId);
-  if (prevData && isNormalWwyd(wwyd.source)) {
-    let prevChannel;
+  if (!prevData) return;
 
+  let prevChannel;
+
+  try {
+    prevChannel = await client.channels.fetch(prevData.channelId);
+  } catch (err) {
+    console.error(`Could not fetch prev channel for guildId ${guildId}`, err);
+  }
+
+  if (prevChannel?.isTextBased()) {
+    let message;
     try {
-      prevChannel = await client.channels.fetch(prevData.channelId);
+      message = await prevChannel.messages.fetch(prevData.messageId);
     } catch (err) {
-      console.error(`Could not fetch prev channel for guildId ${guildId}`, err);
+      console.error(`Could not read prev channel wwyd force, skipping`, err);
     }
-
-    if (prevChannel?.isTextBased()) {
-      let message;
+    if (message) {
       try {
-        message = await prevChannel.messages.fetch(prevData.messageId);
-      } catch (err) {
-        console.error(`Could not read prev channel wwyd force, skipping`, err);
-      }
-      if (message) {
-        try {
-          await message.edit(
-            await generateAnswerMessage(prevData.internalId, null, true),
-          );
-        } catch (err) {
-          console.error(
-            `Could not edit message ${prevData.messageId} for guild ${guildId}`,
-            err,
-          );
-        }
-      } else {
-        console.error(
-          `Message not found ${prevData.messageId} for guild ${guildId}`,
+        await message.edit(
+          await generateAnswerMessage(prevData.internalId, null, true),
         );
-      }
-    }
-
-    if (prevData.attempts !== 0) {
-      try {
-        await prevChannel.send({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("WWYD Daily Recap")
-              .setDescription(
-                `Successes: ${prevData.successes} - Total: ${prevData.attempts} - Success Rate: ${Math.floor((prevData.successes / prevData.attempts) * 100)}%\nGuess Distribution: ${Object.entries(
-                  prevData.answerCounts,
-                )
-                  .sort(([keyA], [keyB]) => keyB.localeCompare(keyA)) // sort keys Z → A
-                  .map(([key, value]) => `${key}:${value}`)
-                  .join(", ")}`,
-              )
-              .setColor("#d9a441"),
-          ],
-        });
       } catch (err) {
         console.error(
-          `Could not send wwyd message stats for guild ${guildId}`,
+          `Could not edit message ${prevData.messageId} for guild ${guildId}`,
           err,
         );
       }
+    } else {
+      console.error(
+        `Message not found ${prevData.messageId} for guild ${guildId}`,
+      );
     }
   }
 
-  const message = await generateQuestionMessage(wwyd, "wwyd_daily");
+  if (prevData.attempts !== 0) {
+    try {
+      await prevChannel.send(
+        generateRecapEmbed(
+          prevData.successes,
+          prevData.attempts,
+          prevData.answerCounts,
+        ),
+      );
+    } catch (err) {
+      console.error(
+        `Could not send wwyd message stats for guild ${guildId}`,
+        err,
+      );
+    }
+  }
+};
+
+const sendLeaderboard = async (client, channel) => {
+  const leaderboard = await  generateLeaderboard(client.db, channel.guildId);
+  try {
+    await channel.send(leaderboard);
+  } catch (err) {
+    console.error(
+      `Tried to send leaderboard but failed`,
+      err,
+    );
+  }
+};
+
+const stageAndCommitSeason = async (client, channel) => {
+  await client.db.models.daily_toggle.stageNewSeason(channel.guildId, 1);
+};
+
+const sendMessage = async (client, channel, wwyd, dailyping) => {
+  const guildId = channel.guildId;
+  if (guildId == null) return;
+
+  const uuid = getWwydUUID(wwyd);
+  const message = await generateQuestionMessage(wwyd, "wwyd_daily", false, dailyping);
 
   for (let k = 0; k < 3; k++) {
     try {
@@ -111,6 +122,34 @@ const sendWwydMessage = async (
   return false;
 };
 
+const sendDailyWwyd = async (
+  client,
+  channel,
+  channelData,
+  funny = false,
+  shouldAutoseason = false,
+) => {
+  if (!funny) {
+    await editPrevWWYD(client, channel);
+  }
+
+  if (channelData?.dailyleaderboard) {
+    await sendLeaderboard(client, channel);
+  }
+
+  if (shouldAutoseason) {
+    await stageAndCommitSeason(client, channel);
+  }
+
+  const guildId = channel.guildId;
+
+  const wwyd = funny
+    ? funnyWwydDaily(parseInt(guildId.substring(1, 10)))
+    : randomWwydDaily(parseInt(guildId.substring(1, 10)), Math.floor(Math.random() * 6));
+
+  return await sendMessage(client, channel, wwyd, channelData?.dailyping);
+};
+
 module.exports = {
   name: "WWYD_Daily",
   once: false,
@@ -122,15 +161,12 @@ module.exports = {
     const shouldAutoseason = date.getDate() === 1; // for autoseason
 
     if (channel) {
-      // Force WWYD
-      await sendWwydMessage(client, channel.guild.id, channel, isAprilFirst);
+      // Force WWYD in a specific channel
+      const channelData = await client.db.models.daily_toggle.getGuildData(
+        channel.guildId,
+      );
+      await sendDailyWwyd(client, channel, channelData, isAprilFirst, false);
     } else {
-      // A new day! Updates the seasons for all servers
-      if (shouldAutoseason) {
-        for (let entry of await client.db.models.daily_toggle.getAutoseasonGuilds()) {
-          await client.db.models.daily_toggle.stageNewSeason(entry.guild_id);
-        }
-      }
       await client.db.models.daily_toggle.commitNewSeasons();
 
       const to_delete = [];
@@ -148,11 +184,12 @@ module.exports = {
 
         if (
           !channel?.isTextBased() ||
-          !(await sendWwydMessage(
+          !(await sendDailyWwyd(
             client,
-            entry.guild_id,
             channel,
+            entry,
             isAprilFirst,
+            shouldAutoseason,
           ))
         ) {
           to_delete.push(entry.channel_id);

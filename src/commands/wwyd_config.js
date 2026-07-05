@@ -3,6 +3,16 @@ const {
   InteractionContextType,
   PermissionFlagsBits,
   MessageFlags,
+  ModalBuilder,
+  LabelBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ChannelType,
+  ActionRowBuilder,
+  ChannelSelectMenuBuilder,
+  RoleSelectMenuBuilder,
+  CheckboxBuilder,
+  CheckboxGroupBuilder,
 } = require("discord.js");
 
 module.exports = {
@@ -26,6 +36,9 @@ module.exports = {
       subcommand
         .setName("auto_season")
         .setDescription("Toggles autoseason for the server"),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand.setName("menu").setDescription("WWYD Menu Config"),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .setContexts(InteractionContextType.Guild),
@@ -90,6 +103,92 @@ module.exports = {
       } else {
         await interaction.reply("Failed to set new season, try again");
       }
+    } else if (subcommand === "menu") {
+      const channelData =
+        await interaction.client.db.models.daily_toggle.getGuildData(
+          interaction.guildId,
+        );
+
+      const modal = new ModalBuilder()
+        .setCustomId("configMenu")
+        .setTitle("Configuration");
+
+      const wwydChannelBuilder = new ChannelSelectMenuBuilder()
+        .setCustomId("wwydchannel")
+        .setMinValues(0)
+        .setMaxValues(1)
+        .setRequired(false)
+        .setChannelTypes([ChannelType.GuildText]);
+
+      if (channelData) {
+        wwydChannelBuilder.setDefaultChannels(channelData?.channel_id);
+      }
+
+      const wwydChannel = new LabelBuilder()
+        .setLabel("WWYD Channel")
+        .setDescription(
+          "Select the channel you want to send daily WWYD's in. Deselect if you want to turn it off.",
+        )
+        .setChannelSelectMenuComponent(wwydChannelBuilder);
+
+      const wwydPingBuilder = new RoleSelectMenuBuilder()
+        .setCustomId("wwydping")
+        .setMinValues(0)
+        .setMaxValues(1)
+        .setRequired(false);
+
+      if (
+        channelData?.dailyping &&
+        (await interaction.guild.roles.cache.get(channelData.dailyping))
+      ) {
+        wwydPingBuilder.setDefaultRoles(channelData.dailyping);
+      }
+
+      const wwydPing = new LabelBuilder()
+        .setLabel("Daily Ping")
+        .setDescription(
+          "Select a role to ping when the Daily WWYD is sent out.",
+        )
+        .setRoleSelectMenuComponent(wwydPingBuilder);
+
+      const checkboxBuilder = new CheckboxGroupBuilder()
+        .setCustomId("toggleable")
+        .setOptions([
+          {
+            label: "Auto Season",
+            description:
+              "Automatically resets the season at the start of every month.",
+            value: "autoseason",
+            default: !!(channelData?.autoseason ?? false),
+          },
+          {
+            label: "Ping on Correct",
+            description: "Pings the answerer if they answered correct.",
+            value: "pingoncorrect",
+            default: !!(channelData?.pingoncorrect ?? true),
+          },
+          {
+            label: "Daily Leaderboard",
+            description: "Sends a daily leaderboard with the new wwyd.",
+            value: "dailyleaderboard",
+            default: !!(channelData?.dailyleaderboard ?? false),
+          },
+          {
+            label: "Force Send a WWYD",
+            description: "Sends a WWYD to the selected channel.",
+            value: "forcewwyd",
+            default: false,
+          },
+        ])
+        .setRequired(false);
+
+      const checkboxLabel = new LabelBuilder()
+        .setLabel("Toggleable Features")
+        .setCheckboxGroupComponent(checkboxBuilder);
+
+      modal.addLabelComponents(wwydChannel, wwydPing, checkboxLabel);
+
+      await interaction.showModal(modal);
     }
   },
 };
