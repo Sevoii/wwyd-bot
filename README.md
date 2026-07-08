@@ -54,4 +54,10 @@ To practice on your own, you can use `/wwyd_random` which will send a private me
 
 ## Credits
 
-A big hanks to everyone who contributed to making this bot possible. Special acknowledgment is given to the UW Riichi Club for providing the Uzaku WWYDs, Zihao Huang for adding sources to the Uzaku WWYDs, and Hue for editing and proofreading the nanikiru WWYDs. 
+A big hanks to everyone who contributed to making this bot possible.
+
+Special acknowledgment is given to: 
+- /mjg/ community for providing the [Uzaku WWYDs](https://github.com/vg-mjg/mjg-repo/blob/master/wwyd/wwyd.json)
+- Hue for editing and proofreading the Nanikiru WWYDs
+- Navitas, Hue, Fumsa for advising on the WWYDs
+- Zihao Huang for adding sources to the Uzaku WWYDs
