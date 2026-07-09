@@ -89,15 +89,11 @@ module.exports = {
 
     if (res === 1 && correct && !(wwydId < 0 && !isAprilFirst)) {
       try {
-        let season =
-          await interaction.client.db.models.daily_toggle.getLatestSeason(
+        const streak =
+          await interaction.client.db.models.daily_scores.getStreak(
             interaction.guildId,
+            interaction.member.id,
           );
-        let score = (await interaction.client.db.models.daily_scores.getScore(
-          interaction.guildId,
-          interaction.member.id,
-          season,
-        )) ?? { streak: 0 };
 
         const channelData =
           await interaction.client.db.models.daily_toggle.getGuildData(
@@ -108,11 +104,11 @@ module.exports = {
           let msg = `<@${interaction.member.id}> got it right!`;
 
           if (wwydId < 0 && correct) {
-            score.streak = 999;
+            streak.streak = 999;
           }
 
-          if (score && score.streak >= 3) {
-            msg += `\n-# Answer Streak: ${score.streak} ${score.streak > 10 ? "🚀" : "🔥"}`;
+          if (streak && streak.streak >= 3) {
+            msg += `\n-# Answer Streak: ${streak.streak} ${streak.streak > 10 ? "🚀" : "🔥"}`;
           }
 
           await interaction.channel.send(msg);
