@@ -57,6 +57,8 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
     }
   }
 
+  const streak = await db.models.daily_scores.getStreak(guildId, discordId);
+
   const score = await db.models.daily_scores.getScore(
     guildId,
     discordId,
@@ -77,12 +79,12 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
             },
             {
               name: "Streak",
-              value: `\`${score.streak}\` ${score.streak >= 10 ? "🚀" : score.streak >= 5 ? "🔥" : ""}`,
+              value: `\`${streak.streak}\` ${streak.streak >= 10 ? "🚀" : streak.streak >= 5 ? "🔥" : ""}`,
               inline: true,
             },
             {
               name: "Best Streak",
-              value: `\`${score.best_streak}\``,
+              value: `\`${streak.best_streak}\``,
               inline: true,
             },
           )

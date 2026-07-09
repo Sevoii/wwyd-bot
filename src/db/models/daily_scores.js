@@ -83,22 +83,49 @@ module.exports = class DailyScores {
     }
   }
 
-  async getScore(guildId, discordId, season) {
+  async getStreak(guildId, discordId) {
     try {
       return await this.db.get(
-        `SELECT UserScore.discord_id, UserScore.streak, UserScore.best_streak, SeasonScores.score, SeasonScores.attempts
+        `SELECT streak, best_streak
          FROM UserScore
-                LEFT JOIN SeasonScores
-                          ON UserScore.discord_id = SeasonScores.discord_id
-                            AND UserScore.guild_id = SeasonScores.guild_id
-         WHERE UserScore.guild_id = @guildId
-           AND UserScore.discord_id = @discordId
-           AND (@season = 0 OR SeasonScores.season = @season)
+         WHERE guild_id = @guildId
+           AND discord_id = @discordId
          LIMIT 1;`,
-        { guildId, discordId, season },
+        { guildId, discordId },
       );
+    } catch (e) {
+      console.error(e);
+      return { streak: -1, best_streak: -1 };
+    }
+  }
+
+  async getScore(guildId, discordId, season) {
+    try {
+      if (season === 0) {
+        // Global Score
+        return await this.db.get(
+          `SELECT SUM(score) as score, SUM(attempts) as attempts
+           FROM SeasonScores
+           WHERE guild_id = @guildId
+             AND discord_id = @discordId
+          `,
+          { guildId, discordId },
+        );
+      } else {
+        // Season Score
+        return await this.db.get(
+          `SELECT score, attempts
+           FROM SeasonScores
+           WHERE guild_id = @guildId
+             AND discord_id = @discordId
+             AND season = @season
+           LIMIT 1`,
+          { guildId, discordId, season },
+        );
+      }
     } catch (err) {
       console.error(err);
+      return { score: -1, attempts: -1 };
     }
   }
 };
