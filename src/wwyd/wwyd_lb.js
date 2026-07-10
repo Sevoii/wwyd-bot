@@ -65,7 +65,7 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
     season,
   );
 
-  if (score != null) {
+  if (score != null && streak != null) {
     const message = {
       embeds: [
         new EmbedBuilder()
@@ -75,6 +75,11 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
             {
               name: "Attempts",
               value: `\`${score.attempts}\``,
+              inline: true,
+            },
+            {
+              name: "Accuracy",
+              value: `\`${(score.score / score.attempts * 100).toFixed(2)}\`%`,
               inline: true,
             },
             {
