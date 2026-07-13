@@ -1,5 +1,9 @@
 const { InteractionContextType, SlashCommandBuilder } = require("discord.js");
-const { generateLeaderboard, generateScore } = require("../wwyd/wwyd_lb");
+const {
+  generateLeaderboard,
+  generateScore,
+  generateHistory,
+} = require("../wwyd/wwyd_lb");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -45,6 +49,25 @@ module.exports = {
     )
     .addSubcommand((subcommand) =>
       subcommand
+        .setName("history")
+        .setDescription("Retrieves your WWYD history.")
+        .addBooleanOption((option) =>
+          option
+            .setName("incorrect")
+            .setDescription(
+              "Whether you want to only display the WWYDs you answered incorrectly",
+            ),
+        )
+        .addBooleanOption((option) =>
+          option
+            .setName("hidden")
+            .setDescription(
+              "Whether you want the message to be hidden from others or not, defaults to public",
+            ),
+        ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
         .setName("season")
         .setDescription("Gets the latest season in the server"),
     )
@@ -59,7 +82,7 @@ module.exports = {
           interaction.client.db,
           interaction.guildId,
           options.getNumber("season"),
-          options.getString("type")
+          options.getString("type"),
         ),
       );
     } else if (subcommand === "score") {
@@ -79,6 +102,17 @@ module.exports = {
         );
 
       await interaction.reply(`Current season: ${currSeason}`);
+    } else if (subcommand === "history") {
+      await interaction.reply(
+        await generateHistory(
+          interaction.client.db,
+          interaction.guildId,
+          interaction.member.id,
+          options.getBoolean("incorrect"),
+          options.getBoolean("hidden"),
+      0,
+        ),
+      );
     }
   },
 };

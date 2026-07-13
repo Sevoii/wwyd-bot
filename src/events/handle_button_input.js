@@ -7,10 +7,9 @@ const {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
 } = require("discord.js");
+const { generateHistory } = require("../wwyd/wwyd_lb");
 
-const createReportModal = async (buttonId) => {
-  const source = buttonId.slice(buttonId.indexOf("-") + 1);
-
+const createReportModal = async (source) => {
   const modal = new ModalBuilder()
     .setCustomId("reportModal")
     .setTitle("Report an Issue");
@@ -75,11 +74,30 @@ module.exports = {
   once: false,
   async execute(interaction) {
     if (!interaction.isButton()) return;
-    const buttonId = interaction.customId;
+    const components = interaction.customId.split(":");
+    const action = components.shift();
 
-    if (buttonId.startsWith("report-")) {
-      const modal = await createReportModal(buttonId);
+    if (action === "report") {
+      const modal = await createReportModal(components[1]);
       await interaction.showModal(modal);
+    } else if (action === "wwyd_history") {
+      const [skip, incorrect, hidden] = components;
+
+      const message = await generateHistory(
+        interaction.client.db,
+        interaction.guildId,
+        interaction.user.id,
+        incorrect === "1",
+        hidden === "1",
+        parseInt(skip),
+      );
+
+      if (hidden === "1") {
+        await interaction.reply(message);
+      } else {
+        await interaction.message.edit(message);
+        await interaction.deferUpdate();
+      }
     }
   },
 };

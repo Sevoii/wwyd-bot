@@ -279,7 +279,7 @@ const generateAnswerMessage = async (internalId, answer, hide = false) => {
         new ButtonBuilder()
           .setLabel("Report an Issue")
           .setStyle(ButtonStyle.Danger)
-          .setCustomId(`report-${wwyd.source}`),
+          .setCustomId(`report:${wwyd.source}`),
       ),
     ],
   };
