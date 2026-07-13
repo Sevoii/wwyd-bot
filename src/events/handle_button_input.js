@@ -78,7 +78,9 @@ module.exports = {
     const action = components.shift();
 
     if (action === "report") {
-      const modal = await createReportModal(components[1]);
+      const [source] = components;
+
+      const modal = await createReportModal(source);
       await interaction.showModal(modal);
     } else if (action === "wwyd_history") {
       const [skip, incorrect, hidden] = components;
