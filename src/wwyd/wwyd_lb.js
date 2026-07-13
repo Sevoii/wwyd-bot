@@ -156,6 +156,7 @@ const generateHistory = async (
     });
 
   const builder = new ActionRowBuilder();
+  let builderFlag = false;
 
   if (skip > 0) {
     builder.addComponents(
@@ -166,21 +167,30 @@ const generateHistory = async (
         .setLabel(`<`)
         .setStyle(ButtonStyle.Secondary),
     );
+
+    builderFlag = true;
   }
 
   if (hasNextPage) {
     builder.addComponents(
       new ButtonBuilder()
-        .setCustomId(`wwyd_history:${skip + limit}:${incorrect ? 1 : 0}:${hidden ? 1 : 0}`)
+        .setCustomId(
+          `wwyd_history:${skip + limit}:${incorrect ? 1 : 0}:${hidden ? 1 : 0}`,
+        )
         .setLabel(`>`)
         .setStyle(ButtonStyle.Secondary),
     );
+
+    builderFlag = true;
   }
 
   const message = {
     embeds: [embed],
-    components: [builder],
   };
+
+  if (builderFlag) {
+    message.components = [builder];
+  }
 
   if (hidden) {
     message.flags = MessageFlags.Ephemeral;
