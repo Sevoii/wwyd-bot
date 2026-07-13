@@ -8,9 +8,7 @@ const {
   StringSelectMenuOptionBuilder,
 } = require("discord.js");
 
-const createReportModal = async (buttonId) => {
-  const source = buttonId.slice(buttonId.indexOf("-") + 1);
-
+const createReportModal = async (source) => {
   const modal = new ModalBuilder()
     .setCustomId("reportModal")
     .setTitle("Report an Issue");
@@ -75,10 +73,10 @@ module.exports = {
   once: false,
   async execute(interaction) {
     if (!interaction.isButton()) return;
-    const buttonId = interaction.customId;
+    const components = interaction.customId.split(":");
 
-    if (buttonId.startsWith("report-")) {
-      const modal = await createReportModal(buttonId);
+    if (components[0] === "report") {
+      const modal = await createReportModal(components[1]);
       await interaction.showModal(modal);
     }
   },
