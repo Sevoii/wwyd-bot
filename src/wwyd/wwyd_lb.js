@@ -1,4 +1,10 @@
-const { EmbedBuilder, MessageFlags } = require("discord.js");
+const {
+  EmbedBuilder,
+  MessageFlags,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require("discord.js");
 
 const generateLeaderboard = async (db, guildId, season, type) => {
   if (season == null) {
@@ -79,7 +85,7 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
             },
             {
               name: "Accuracy",
-              value: `\`${(score.score / score.attempts * 100).toFixed(2)}\`%`,
+              value: `\`${((score.score / score.attempts) * 100).toFixed(2)}\`%`,
               inline: true,
             },
             {
@@ -118,7 +124,73 @@ const generateScore = async (db, guildId, discordId, season, hidden) => {
   }
 };
 
+const generateHistory = async (
+  db,
+  guildId,
+  discordId,
+  incorrect,
+  hidden,
+  skip,
+  limit = 10,
+) => {
+  const { results, hasNextPage } = await db.models.daily_scores.getHistory(
+    guildId,
+    discordId,
+    incorrect,
+    skip,
+    limit,
+  );
+
+  const embed = new EmbedBuilder()
+    .setTitle("WWYD History")
+    .setDescription(
+      results
+        .map(
+          (x, i) =>
+            `${i + skip + 1}. ${x.correct ? "✅" : "❌"} \`${x.internal_id}\` - ${x.answer}`,
+        )
+        .join("\n") || "No history found",
+    )
+    .setFooter({
+      text: "Run `/wwyd_random problemid:[id]` to practice",
+    });
+
+  const builder = new ActionRowBuilder();
+
+  if (skip > 0) {
+    builder.addComponents(
+      new ButtonBuilder()
+        .setCustomId(
+          `wwyd_history:${Math.max(0, skip - limit)}:${incorrect ? 1 : 0}:${hidden ? 1 : 0}`,
+        )
+        .setLabel(`<`)
+        .setStyle(ButtonStyle.Secondary),
+    );
+  }
+
+  if (hasNextPage) {
+    builder.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`wwyd_history:${skip + limit}:${incorrect ? 1 : 0}:${hidden ? 1 : 0}`)
+        .setLabel(`>`)
+        .setStyle(ButtonStyle.Secondary),
+    );
+  }
+
+  const message = {
+    embeds: [embed],
+    components: [builder],
+  };
+
+  if (hidden) {
+    message.flags = MessageFlags.Ephemeral;
+  }
+
+  return message;
+};
+
 module.exports = {
   generateLeaderboard,
   generateScore,
+  generateHistory,
 };

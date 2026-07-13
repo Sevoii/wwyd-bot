@@ -128,4 +128,39 @@ module.exports = class DailyScores {
       return { score: -1, attempts: -1 };
     }
   }
+
+  async getHistory(guildId, discordId, incorrect, skip, limit) {
+    try {
+      const rows = await this.db.all(
+        `
+          WITH answers AS (SELECT problem_id, correct, answer
+                           FROM WwydScore
+                           WHERE guild_id = @guildId
+                             AND discord_id = @discordId
+                             AND (NOT @incorrect OR NOT correct)
+                             AND answer != 'na'
+                           ORDER BY problem_id DESC
+                           LIMIT @limit OFFSET @skip)
+          SELECT WwydDaily.internal_id as internal_id, answers.correct as correct, answers.answer as answer
+          FROM answers
+                 LEFT JOIN WwydDaily ON answers.problem_id = WwydDaily.problem_id
+        `,
+        {
+          guildId,
+          discordId,
+          incorrect: incorrect ? 1 : 0,
+          skip,
+          limit: limit + 1,
+        },
+      );
+
+      const hasNextPage = rows.length > limit;
+      const results = hasNextPage ? rows.slice(0, limit) : rows;
+
+      return { results, hasNextPage };
+    } catch (err) {
+      console.error(err);
+      return { results: [], hasNextPage: false };
+    }
+  }
 };
