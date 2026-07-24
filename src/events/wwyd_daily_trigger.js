@@ -141,7 +141,7 @@ const sendMessage = async (client, channel, wwyd, dailyping) => {
     }
   }
 
-  return false;
+  return Boolean(sent);
 };
 
 const sendDailyWwyd = async (

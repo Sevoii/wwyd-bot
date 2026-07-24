@@ -56,11 +56,14 @@ Contains list of channels which we need to send daily messages to.
 
 Key: `(guild_id)`
 
-| Field        | Datatype       | Description                                                       | Notes                                                 |
-|--------------|----------------|-------------------------------------------------------------------|-------------------------------------------------------|
-| `guild_id`   | `VARACHAR(18)` | Discord Guild Id where the problem is sent                        |                                                       |
-| `channel_id` | `VARCHAR(18)`  | Discord Channel Id where the message should be sent               | Needed to edit the message                            |
-| `autoseason` | `BOOLEAN`      | Whether the guild will automatically increment season every month | Stored as an integer due to SQLITE not having BOOLEAN |
+| Field               | Datatype       | Description                                                       | Notes                                                 |
+|---------------------|----------------|-------------------------------------------------------------------|-------------------------------------------------------|
+| `guild_id`          | `VARACHAR(18)` | Discord Guild Id where the problem is sent                        |                                                       |
+| `channel_id`        | `VARCHAR(18)`  | Discord Channel Id where the message should be sent               | Needed to edit the message                            |
+| `autoseason`        | `BOOLEAN`      | Whether the guild will automatically increment season every month | Stored as an integer due to SQLITE not having BOOLEAN |
+| `pingoncorrect`     | `BOOLEAN`      | Whether to ping on correct answer or not                          |                                                       |
+| `dailyping`         | `VARCHAR(18)`  | Discord Role Id to ping                                           |                                                       |
+| ` dailyleaderboard` | `BOOLEAN`      | Whether to send a daily leaderboard                               |                                                       |
 
 ## `WwydDaily`
 
