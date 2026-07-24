@@ -124,7 +124,7 @@ const formatAnalysisCompact = (data, hide = false) => {
   if (data.t_test) {
     lines.push("");
     lines.push("Welch's 2 Sample T-Test");
-    lines.push(`Compare: ${data.t_test.tiles[0]}, ${data.t_test.tiles[1]}`);
+    lines.push(`H_α: EV ${data.t_test.tiles[0]} ≠ ${data.t_test.tiles[1]}`);
     lines.push(
       `t=${data.t_test.t.toFixed(2)}, df=${data.t_test.df.toFixed(2)}`,
     );
