@@ -10,6 +10,7 @@ const {
   getWwydUUID,
 } = require("../wwyd/wwyd_discord");
 const { generateLeaderboard } = require("../wwyd/wwyd_lb");
+const { ThreadAutoArchiveDuration } = require("discord.js");
 
 // Split this into distinct stages:
 //   1. Edit Old Messages
@@ -75,14 +76,11 @@ const editPrevWWYD = async (client, channel) => {
 };
 
 const sendLeaderboard = async (client, channel) => {
-  const leaderboard = await  generateLeaderboard(client.db, channel.guildId);
+  const leaderboard = await generateLeaderboard(client.db, channel.guildId);
   try {
     await channel.send(leaderboard);
   } catch (err) {
-    console.error(
-      `Tried to send leaderboard but failed`,
-      err,
-    );
+    console.error(`Tried to send leaderboard but failed`, err);
   }
 };
 
@@ -95,11 +93,17 @@ const sendMessage = async (client, channel, wwyd, dailyping) => {
   if (guildId == null) return;
 
   const uuid = getWwydUUID(wwyd);
-  const message = await generateQuestionMessage(wwyd, "wwyd_daily", false, dailyping);
+  const message = await generateQuestionMessage(
+    wwyd,
+    "wwyd_daily",
+    false,
+    dailyping,
+  );
 
+  let sent;
   for (let k = 0; k < 3; k++) {
     try {
-      const sent = await channel.send(message);
+      sent = await channel.send(message);
       if (isNormalWwyd(wwyd.source)) {
         await client.db.models.daily_message.setLatestWwyd(
           guildId,
@@ -110,10 +114,28 @@ const sendMessage = async (client, channel, wwyd, dailyping) => {
         );
       }
 
-      return true;
+      break;
     } catch (err) {
       console.error(
         `Attempt ${k + 1}: Could not send new wwyd for guild ${guildId} in channel ${channel.id}`,
+        err,
+      );
+    }
+  }
+
+  if (sent) {
+    try {
+      await sent.startThread({
+        name: `${new Date()
+          .toLocaleString("en-US", {
+            timeZone: "America/New_York",
+          })
+          .slice(0, 10)} Discussion Thread`,
+        autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
+      });
+    } catch (err) {
+      console.error(
+        `Attempted to create a discussion thread for guild ${guildId} in channel ${channel.id}`,
         err,
       );
     }
