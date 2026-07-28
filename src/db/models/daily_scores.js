@@ -54,7 +54,7 @@ module.exports = class DailyScores {
            WHERE UserScore.guild_id = @guildId
              AND SeasonScores.season = @season
              AND SeasonScores.attempts > 9
-           ORDER BY SeasonScores.score / SeasonScores.attempts DESC, streak DESC
+           ORDER BY 1.0 * SeasonScores.score / SeasonScores.attempts DESC, streak DESC
            LIMIT 10`,
           { guildId, season },
         );
@@ -73,7 +73,7 @@ module.exports = class DailyScores {
                  WHERE UserScore.guild_id = @guildId)
            GROUP BY discord_id, guild_id
            HAVING SUM(attempts) > 9
-           ORDER BY score / attempts DESC, streak DESC
+           ORDER BY 1.0 * score / attempts DESC, streak DESC
            LIMIT 10`,
           { guildId },
         );
