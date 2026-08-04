@@ -120,7 +120,7 @@ module.exports = {
             name:
               "Pystyle Analysis on " +
               hand + draw +
-              " dora " +
+              " indicator " +
               doraIndicator +
               " turn " +
               turn,
