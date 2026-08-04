@@ -88,7 +88,7 @@ const stageAndCommitSeason = async (client, channel) => {
   await client.db.models.daily_toggle.stageNewSeason(channel.guildId, 1);
 };
 
-const sendMessage = async (client, channel, wwyd, dailyping) => {
+const sendMessage = async (client, channel, wwyd, dailyping, dailythread) => {
   const guildId = channel.guildId;
   if (guildId == null) return;
 
@@ -123,7 +123,7 @@ const sendMessage = async (client, channel, wwyd, dailyping) => {
     }
   }
 
-  if (sent) {
+  if (sent && dailythread) {
     try {
       await sent.startThread({
         name: `${new Date()
@@ -169,7 +169,13 @@ const sendDailyWwyd = async (
     ? funnyWwydDaily(parseInt(guildId.substring(1, 10)))
     : randomWwydDaily(parseInt(guildId.substring(1, 10)));
 
-  return await sendMessage(client, channel, wwyd, channelData?.dailyping);
+  return await sendMessage(
+    client,
+    channel,
+    wwyd,
+    channelData?.dailyping,
+    channelData?.dailythread,
+  );
 };
 
 module.exports = {

@@ -174,6 +174,12 @@ module.exports = {
             default: !!(channelData?.dailyleaderboard ?? false),
           },
           {
+            label: "Daily Thread",
+            description: "Creates a thread every day",
+            value: "dailythread",
+            default: !!(channelData?.dailythread ?? false),
+          },
+          {
             label: "Force Send a WWYD",
             description: "Sends a WWYD to the selected channel.",
             value: "forcewwyd",
