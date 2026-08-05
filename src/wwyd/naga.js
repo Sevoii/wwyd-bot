@@ -503,7 +503,7 @@ const renderImage = async (columns, analysis) => {
   const height = yAcc;
 
   const svg = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" font-family="monospace">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" font-family="Noto Sans JP, monospace">`,
     `<rect width="${width}" height="${height}" fill="#ffffff"/>`,
   ];
 
