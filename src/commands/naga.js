@@ -9,10 +9,44 @@ const {
   AttachmentBuilder,
 } = require("discord.js");
 const {
+  fetchData,
   getAnalysis,
+  renderImage,
   formatAnalysisCompact,
-  fetchScreenshot,
 } = require("../wwyd/naga");
+
+const toLegacyAnalysis = (columns, analysis) => {
+  const simData = columns.map((c, i) => ({
+    tile: c.dahai + (c.wReach ? "(r)" : ""),
+    mean: c.kyokuBp.mean,
+    var: c.kyokuBp.var,
+    win: c.hora / c.numSims,
+    num_sims: c.numSims,
+    _ev: analysis.roundEV[i], // carried along for the t-test, stripped below
+  }));
+  simData.sort((a, b) => b.mean - a.mean);
+
+  const legacy = { data: simData };
+
+  if (simData.length >= 2) {
+    const best = simData[0]._ev;
+    const second = simData[1]._ev;
+    const v1 = best.se ** 2;
+    const v2 = second.se ** 2;
+    const df =
+      (v1 + v2) ** 2 / (v1 ** 2 / (best.n - 1) + v2 ** 2 / (second.n - 1));
+
+    legacy.t_test = {
+      tiles: [simData[0].tile, simData[1].tile],
+      t: second.z,
+      df,
+      p: second.p,
+    };
+  }
+
+  for (const d of simData) delete d._ev;
+  return legacy;
+};
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -23,13 +57,9 @@ module.exports = {
         .setRequired(true)
         .setName("url")
         .setDescription("Naga Simulation URL"),
-    )
-    .addAttachmentOption((option) =>
-      option.setName("image").setDescription("Use a custom image instead of the default screenshot"),
     ),
   async execute(interaction) {
     const url = interaction.options.getString("url");
-    const attachment = interaction.options.getAttachment("image");
 
     if (!url.startsWith("https://naga.dmv.nico/htmls/simulation_viewer.html")) {
       return await interaction.reply({
@@ -38,20 +68,21 @@ module.exports = {
       });
     }
 
-    if (attachment != null && !attachment.contentType.startsWith("image/")) {
-      return await interaction.reply({
-        content: "Attached file is not an image, please try again",
-        ephemeral: true,
-      });
-    }
-
     const sentMessage = await interaction.deferReply();
 
-    const data = await getAnalysis(url);
-    if (!data) {
+    // fetch columns -> analyze
+    let columns, analysis;
+    try {
+      const simIds = new URL(url).searchParams
+        .get("sim_ids")
+        .split(",")
+        .map((d) => d.split("_")[0]);
+      columns = await Promise.all(simIds.map(fetchData));
+      analysis = getAnalysis(columns);
+    } catch (err) {
+      console.error(err);
       return await interaction.editReply({
         content: "Failed to get Naga data, please try again",
-        ephemeral: true,
       });
     }
 
@@ -60,7 +91,9 @@ module.exports = {
         new EmbedBuilder()
           .setURL(url)
           .setTitle("NAGA Analysis")
-          .setDescription(formatAnalysisCompact(data)),
+          .setDescription(
+            formatAnalysisCompact(toLegacyAnalysis(columns, analysis)),
+          ),
       ],
       components: [
         new ActionRowBuilder().addComponents(
@@ -73,20 +106,11 @@ module.exports = {
       ],
     };
 
-    if (attachment) {
-      message.files = [attachment.url];
-    } else {
-      let buf = null;
-      // try 3 times to fetch screenshot data
-      for (let i = 0; i < 3; i++) {
-        buf = await fetchScreenshot(url);
-        if (buf) break;
-      }
-
-      if (buf) {
-        const file = new AttachmentBuilder(buf, { name: "naga.png" });
-        message.files = [file];
-      }
+    try {
+      const buf = await renderImage(columns, analysis);
+      message.files = [new AttachmentBuilder(buf, { name: "naga.png" })];
+    } catch (err) {
+      console.error("naga render failed:", err);
     }
 
     await interaction.editReply(message);
