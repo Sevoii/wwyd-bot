@@ -41,6 +41,7 @@ const handleConfigModal = async (interaction) => {
   const autoseason = toggles.includes("autoseason") | 0;
   const pingoncorrect = toggles.includes("pingoncorrect") | 0;
   const dailyleaderboard = toggles.includes("dailyleaderboard") | 0;
+  const dailythread = toggles.includes("dailythread") | 0;
   const forcewwyd = toggles.includes("forcewwyd");
 
   if (channel) {
@@ -50,7 +51,8 @@ const handleConfigModal = async (interaction) => {
       autoseason,
       pingoncorrect,
       dailyping,
-      dailyleaderboard
+      dailyleaderboard,
+      dailythread
     );
 
     if (forcewwyd) {

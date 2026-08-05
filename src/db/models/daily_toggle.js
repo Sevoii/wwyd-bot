@@ -78,8 +78,9 @@ module.exports = class DailyToggle {
     channelId,
     autoseason = null,
     pingoncorrect = null,
-    dailyping = 0,  // generic default should never be used
-    dailyleaderboard = null
+    dailyping = 0, // generic default should never be used
+    dailyleaderboard = null,
+    dailythread = null,
   ) {
     await this.db.run(`BEGIN TRANSACTION;`);
     try {
@@ -91,6 +92,7 @@ module.exports = class DailyToggle {
                                               pingoncorrect    = COALESCE(@pingoncorrect, pingoncorrect),
                                               autoseason       = COALESCE(@autoseason, autoseason),
                                               dailyleaderboard = COALESCE(@dailyleaderboard, dailyleaderboard),
+                                              dailythread      = COALESCE(@dailythread, dailythread),
                                               dailyping        = CASE WHEN @dailyping = 0 THEN dailyping ELSE @dailyping END
         `,
         {
@@ -100,6 +102,7 @@ module.exports = class DailyToggle {
           autoseason,
           dailyleaderboard,
           dailyping,
+          dailythread,
         },
       );
 
