@@ -92,7 +92,7 @@ module.exports = class DailyToggle {
                                               pingoncorrect    = COALESCE(@pingoncorrect, pingoncorrect),
                                               autoseason       = COALESCE(@autoseason, autoseason),
                                               dailyleaderboard = COALESCE(@dailyleaderboard, dailyleaderboard),
-                                              dailythread      = COALESCE(@dailyleaderboard, dailythread),
+                                              dailythread      = COALESCE(@dailythread, dailythread),
                                               dailyping        = CASE WHEN @dailyping = 0 THEN dailyping ELSE @dailyping END
         `,
         {
