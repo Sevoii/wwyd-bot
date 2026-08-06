@@ -4,13 +4,12 @@ const { Studentt } = require("distributions");
 
 const NAGA_NAMES = ["Nishiki", "Hibakari", "Omega", "Gamma", "Kagashi"];
 const WINDS = ["East", "South", "West", "North"];
-const TILE_DIR = path.join(__dirname, "../assets/tiles");
+const TILE_DIR = path.join(__dirname, "../assets/naga");
 
 // source art is 80x129; the top 12px are cropped off -> 80x117 usable
-const TILE_SRC_W = 80;
-const TILE_SRC_H = 129;
-const TILE_CROP_TOP = 12;
-const TILE_RATIO = (TILE_SRC_H - TILE_CROP_TOP) / TILE_SRC_W; // 117 / 80
+const TILE_SRC_W = 66;
+const TILE_SRC_H = 90;
+const TILE_RATIO = TILE_SRC_H / TILE_SRC_W;
 
 const SPECIAL_MAPPINGS = {
   "5mr": "0m",
@@ -81,8 +80,8 @@ const fetchData = async (simId) => {
       dora: first.dora,
     },
     scores: first.scores,
-    tehai: first.tehai,
-    dahai: first.dahai,
+    tehai: first.tehai.map(toDefault),
+    dahai: toDefault(first.dahai),
     wReach: first.w_reach,
     type1: first.type1,
     type2: first.type2,
@@ -363,12 +362,6 @@ const loadTile = async (name, w) => {
     tileCache.set(
       key,
       await sharp(file)
-        .extract({
-          left: 0,
-          top: TILE_CROP_TOP,
-          width: TILE_SRC_W,
-          height: TILE_SRC_H - TILE_CROP_TOP,
-        })
         .resize(w, h)
         .png()
         .toBuffer(),
