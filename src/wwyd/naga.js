@@ -12,9 +12,21 @@ const TILE_SRC_H = 129;
 const TILE_CROP_TOP = 12;
 const TILE_RATIO = (TILE_SRC_H - TILE_CROP_TOP) / TILE_SRC_W; // 117 / 80
 
+const SPECIAL_MAPPINGS = {
+  "5mr": "0m",
+  "5pr": "0p",
+  "5sr": "0s",
+  E: "1z",
+  S: "2z",
+  W: "3z",
+  N: "4z",
+  P: "5z",
+  F: "6z",
+  C: "7z",
+};
+
 const toDefault = (t) => {
-  if (/^5[mps]r$/.test(t)) return `0${t[1]}`;
-  return t;
+  return SPECIAL_MAPPINGS[t] ?? t;
 };
 
 const esc = (s) =>
@@ -471,7 +483,8 @@ const renderColumn = (col, analysis, colIndex, x, rowYs) => {
       const countStr = cfg.showCount ? `(${st.count})` : "";
       const gap = countStr ? 5 : 0;
       const meanY = y + 44;
-      const lineTotal = tw(line, 14) + gap + (countStr ? tw(countStr, 12.5) : 0);
+      const lineTotal =
+        tw(line, 14) + gap + (countStr ? tw(countStr, 12.5) : 0);
       const mx = cx - lineTotal / 2;
       svg.push(
         `<text x="${mx}" y="${meanY}" font-size="14" font-weight="bold" fill="${TEXT}">${esc(line)}</text>`,
