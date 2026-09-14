@@ -28,7 +28,7 @@ const generateLeaderboard = async (db, guildId, season, type) => {
     .setDescription(
       lb
         .map((x, i) => {
-          let base = `${i + 1}. <@${x.discord_id}> — `;
+          let base = `${i + 1}. <@${x.discord_id}> - `;
 
           let parts = [];
 

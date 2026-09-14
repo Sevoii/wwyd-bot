@@ -83,6 +83,24 @@ module.exports = class DailyScores {
     }
   }
 
+  async getFastest10(guildId, problemId) {
+    try {
+      return await this.db.all(
+        `SELECT WwydScore.discord_id, UserScore.streak
+         FROM WwydScore
+                LEFT JOIN UserScore
+                          ON WwydScore.discord_id = UserScore.discord_id AND WwydScore.guild_id = UserScore.guild_id
+         WHERE WwydScore.guild_id = @guildId
+           AND problem_id = @problemId
+         ORDER BY WwydScore.rowid
+         LIMIT 10`,
+        { guildId, problemId },
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   async getStreak(guildId, discordId) {
     try {
       return await this.db.get(
