@@ -58,27 +58,27 @@ module.exports = {
     const message = await generateAnswerMessage(buttonData[1], buttonData[3]);
 
     // hotfix -> add fastest 5 scorers
-    const fastest =
-      await interaction.client.db.models.daily_scores.getFastest10(
-        interaction.guildId,
-        buttonData[2],
-      );
-
-    if (fastest) {
-      message.embeds.push(
-        new EmbedBuilder().setTitle("First 10 to Answer").setDescription(
-          fastest
-            .map((x, i) => {
-              let answer = `${i + 1}. <@${x.discord_id}>`;
-              if (x.streak >= 5) {
-                answer += ` (${x.streak} ${x.streak >= 10 ? "🚀" : "🔥"})`;
-              }
-              return answer;
-            })
-            .join("\n"),
-        ),
-      );
-    }
+    // const fastest =
+    //   await interaction.client.db.models.daily_scores.getFastest10(
+    //     interaction.guildId,
+    //     buttonData[2],
+    //   );
+    //
+    // if (fastest) {
+    //   message.embeds.push(
+    //     new EmbedBuilder().setTitle("idk how to title this (fastest 10)").setDescription(
+    //       fastest
+    //         .map((x, i) => {
+    //           let answer = `${i + 1}. <@${x.discord_id}>`;
+    //           if (x.streak >= 5) {
+    //             answer += ` (${x.streak} ${x.streak >= 10 ? "🚀" : "🔥"})`;
+    //           }
+    //           return answer;
+    //         })
+    //         .join("\n"),
+    //     ),
+    //   );
+    // }
 
     if (!isPass) {
       if (isNormalWwyd(buttonData[1])) {
