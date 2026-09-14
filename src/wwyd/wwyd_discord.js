@@ -149,7 +149,7 @@ const STYLE_MAPPING = {
   s: ButtonStyle.Success,
 };
 
-const generateQuestionMessage = async (wwyd, label, ephemeral = false, ping = null) => {
+const generateQuestionMessage = async (wwyd, uuid, label, ephemeral = false, ping = null) => {
   const image = await generateImage(wwyd);
   const options = getOptions(wwyd);
 
@@ -160,8 +160,6 @@ const generateQuestionMessage = async (wwyd, label, ephemeral = false, ping = nu
   // .setImage("attachment://wwyd.png");
 
   const actionRows = [];
-
-  const uuid = getWwydUUID(wwyd);
 
   for (let j = 0; j < options.length; j += 5) {
     actionRows.push(
