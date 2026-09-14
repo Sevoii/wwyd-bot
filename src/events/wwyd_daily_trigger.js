@@ -199,7 +199,7 @@ module.exports = {
 
       const to_delete = [];
 
-      for (let entry of await client.db.models.daily_toggle.getDailyChannels()) {
+      for (let entry of await client.db.models.daily_toggle.getDailyChannelsNoWwyd()) {
         let channel;
         try {
           channel = await client.channels.fetch(entry.channel_id);

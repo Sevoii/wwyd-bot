@@ -16,6 +16,26 @@ module.exports = class DailyToggle {
     }
   }
 
+  async getDailyChannelsNoWwyd() {
+    try {
+      return await this.db.all(
+        `WITH latest_wwyd AS (SELECT guild_id, MAX(created) AS last_wwyd_sent_at
+                              FROM WwydDaily
+                              GROUP BY guild_id)
+         SELECT WwydChannels.*
+         FROM WwydChannels
+                LEFT JOIN latest_wwyd
+                          ON latest_wwyd.guild_id = WwydChannels.guild_id
+         WHERE latest_wwyd.last_wwyd_sent_at IS NULL
+            OR latest_wwyd.last_wwyd_sent_at < datetime('now', '-24 hours')`,
+        {},
+      );
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
   async getAutoseasonGuilds() {
     try {
       return await this.db.all(

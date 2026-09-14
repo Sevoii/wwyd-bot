@@ -17,7 +17,10 @@ module.exports = {
 
     schedule.scheduleJob(rule, () => {
       client.emit("WWYD_Daily", client);
-      client.db.backup()
+      client.db.backup();
     });
+
+    client.emit("WWYD_Daily", client);
+    client.db.backup();
   },
 };
