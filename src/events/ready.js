@@ -1,4 +1,5 @@
 const { Events, ActivityType } = require("discord.js");
+const { DateTime } = require("luxon");
 const schedule = require("node-schedule");
 
 module.exports = {
@@ -20,7 +21,20 @@ module.exports = {
       client.db.backup();
     });
 
-    client.emit("WWYD_Daily", client);
+    const now = DateTime.now().setZone("America/New_York");
+    const scheduledSendTime = now.set({
+      hour: 10,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
+
+    if (Math.abs(now.diff(scheduledSendTime, "hours").hours) > 1) {
+      client.emit("WWYD_Daily", client);
+    } else {
+      console.log("Skipping startup WWYD send");
+    }
+
     client.db.backup();
   },
 };

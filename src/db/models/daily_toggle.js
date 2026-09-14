@@ -27,7 +27,7 @@ module.exports = class DailyToggle {
                 LEFT JOIN latest_wwyd
                           ON latest_wwyd.guild_id = WwydChannels.guild_id
          WHERE latest_wwyd.last_wwyd_sent_at IS NULL
-            OR latest_wwyd.last_wwyd_sent_at < datetime('now', '-24 hours')`,
+            OR latest_wwyd.last_wwyd_sent_at < datetime('now', '-22 hours')`,
         {},
       );
     } catch (err) {
