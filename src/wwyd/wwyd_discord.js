@@ -140,8 +140,7 @@ const getOptions = ({ hand, draw }) => {
 };
 
 const getWwydUUID = ({ source }) => {
-  const date = new Date();
-  return date.toISOString().slice(0, 10).replace(/-/g, "") + "-" + source;
+  return Date.now() + "-" + source;
 };
 
 const STYLE_MAPPING = {
