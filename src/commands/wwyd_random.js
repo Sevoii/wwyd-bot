@@ -17,6 +17,7 @@ module.exports = {
     const message = await generateQuestionMessage(
       problemId == null ? randomWwyd() : getWwyd(problemId),
       "wwyd_random",
+      "wwyd_random",
       true,
     );
     await interaction.reply(message);

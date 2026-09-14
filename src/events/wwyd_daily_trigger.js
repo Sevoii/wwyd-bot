@@ -95,6 +95,7 @@ const sendMessage = async (client, channel, wwyd, dailyping, dailythread) => {
   const uuid = getWwydUUID(wwyd);
   const message = await generateQuestionMessage(
     wwyd,
+    uuid,
     "wwyd_daily",
     false,
     dailyping,
