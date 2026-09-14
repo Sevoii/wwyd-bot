@@ -210,18 +210,19 @@ module.exports = {
           );
         }
 
-        if (
-          !channel?.isTextBased() ||
-          !(await sendDailyWwyd(
+        try {
+          if (!(await sendDailyWwyd(
             client,
             channel,
             entry,
             isAprilFirst,
             shouldAutoseason,
-          ))
-        ) {
-          to_delete.push(entry.channel_id);
-          console.log(`Channel Error for ${entry.guild_id}`);
+          ))) {
+            to_delete.push(entry.channel_id);
+            console.log(`Channel Error for ${entry.guild_id}`);
+          }
+        } catch (err) {
+          console.error(`Could not send wwyd for channel ${channel}`, err)
         }
       }
 
