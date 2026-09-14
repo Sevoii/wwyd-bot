@@ -92,6 +92,7 @@ module.exports = class DailyScores {
                           ON WwydScore.discord_id = UserScore.discord_id AND WwydScore.guild_id = UserScore.guild_id
          WHERE WwydScore.guild_id = @guildId
            AND problem_id = @problemId
+           AND WwydScore.correct
          ORDER BY WwydScore.rowid
          LIMIT 10`,
         { guildId, problemId },

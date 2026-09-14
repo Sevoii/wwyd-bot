@@ -65,13 +65,15 @@ module.exports = {
       );
 
     if (fastest) {
-      console.log(fastest)
-
       message.embeds.push(
         new EmbedBuilder().setTitle("First 10 to Answer").setDescription(
           fastest
             .map((x, i) => {
-              return `${i + 1}. <@${x.discord_id}> (${x.streak}${x.streak > 10 ? "🚀" : x.streak >= 3 ? "🔥" : ""})`;
+              let answer = `${i + 1}. <@${x.discord_id}>`;
+              if (x.streak >= 5) {
+                answer += ` (${x.streak} ${x.streak >= 10 ? "🚀" : "🔥"})`;
+              }
+              return answer;
             })
             .join("\n"),
         ),
