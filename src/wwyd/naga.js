@@ -2,7 +2,7 @@ const path = require("path");
 const sharp = require("sharp");
 const { Studentt } = require("distributions");
 
-const NAGA_NAMES = ["Nishiki", "Hibakari", "Omega", "Gamma", "Kagashi"];
+const NAGA_NAMES = ["Nishiki", "Hibakari", "Omega", "Gamma", "Kagashi", "Ananta", "Ouroboros"];
 const WINDS = ["East", "South", "West", "North"];
 const TILE_DIR = path.join(__dirname, "../assets/naga");
 
