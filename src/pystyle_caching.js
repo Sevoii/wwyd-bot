@@ -15,7 +15,7 @@ const axios = require("axios");
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const API_URL = "https://pystyle.info/apps/mahjong-cpp_0.9.1/post.py";
+const API_URL = "https://pystyle.info/apps/mahjong-nanikiru-simulator/post.py";
 // const API_URL = "http://localhost:8002/";
 
 const formatJson = (arr) => {
@@ -28,7 +28,7 @@ const formatJson = (arr) => {
   let c = 0;
   for (let i of wwyd) {
     // Skip wwyds with things
-    if ('pystyle' in i) continue;
+    // if ('pystyle' in i) continue;
 
     if (++c % 10 === 0) {
       console.log(`Parsing ${c}'th wwyd`);
@@ -65,7 +65,6 @@ const formatJson = (arr) => {
     }
 
     i.pystyle = resp != null ? convertResponseData(resp, parseInt(i.turn)) : [];
-    await sleep(500);
   }
 
   // fs.writeFileSync("./assets/wwyd.json", JSON.stringify(wwyd, null, 2), "utf8");
