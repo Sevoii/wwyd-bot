@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const API_URL = "https://pystyle.info/apps/mahjong-cpp_0.9.1/post.py";
+const API_URL = "https://pystyle.info/apps/mahjong-nanikiru-simulator/post.py";
 
 function convertTileToNumber(tile) {
   if (!/^[0-9][mpsz]$/.test(tile)) {
@@ -78,18 +78,18 @@ function convertWwydToApiFormat(wwyd) {
   const wall = generateWall([...allHandTiles, doraIndicator]);
 
   return {
+    dora_indicators: [doraIndicator],
     enable_reddora: true,
-    enable_uradora: true,
     enable_shanten_down: true,
     enable_tegawari: true,
-    enable_riichi: false,
-    round_wind: roundWind,
-    dora_indicators: [doraIndicator],
+    enable_uradora: true,
+    game_mode:	1,
     hand: allHandTiles,
     melds: [],
+    round_wind: roundWind,
     seat_wind: seatWind,
     wall: wall,
-    version: "0.9.1",
+    version: "0.9.8",
   };
 }
 
@@ -124,11 +124,11 @@ async function getMahjongAnalysis(data) {
 
 function convertResponseData(response, turn) {
   // Convert back the tile numbers to their string representations
-  const options = response.response.stats.map((stat) => {
+  const options = response.stats.map((stat) => {
     return {
       tile: convertNumberToTile(stat.tile),
       shanten: stat.shanten,
-      back: stat.shanten > response.response.shanten.all,
+      back: stat.shanten > response.shanten.all,
       wait_count: stat.necessary_tiles.reduce(
         (sum, wait) => sum + wait.count,
         0,
